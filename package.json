@@ -1,0 +1,29 @@
+{
+  "name": "otpl",
+  "version": "0.3.0",
+  "description": "OTPL for Nodejs",
+  "main": "dst/index.js",
+  "scripts": {
+    "install": "tsc -p tsconfig.json",
+    "test": "node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diosay/otpl-node.git"
+  },
+  "keywords": [
+    "otpl",
+    "otpl-node",
+    "template",
+    "node",
+    "template",
+    "javascript",
+    "template"
+  ],
+  "author": "diosay",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/diosay/otpl-node/issues"
+  },
+  "homepage": "https://github.com/diosay/otpl-node#readme"
+}

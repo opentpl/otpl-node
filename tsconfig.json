@@ -1,0 +1,14 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "module": "amd",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "outFile": "dst/index.js",
+        "sourceMap": true
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}
