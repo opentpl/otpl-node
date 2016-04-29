@@ -384,7 +384,7 @@ export class SetVariable extends Opcode {
     }
 
     exec(context: Context): number {
-        context.setLocal(this.name, context.getLocal(this.name));
+        context.setLocal(this.name, context.pop());
         return this.ptr + 1;
     }
 
@@ -865,8 +865,8 @@ export class Include extends Opcode {
 //迭代器帮助类
 class Iterator {
     iter: IterableIterator<any>
-    result:IteratorResult<any>
-    current:any
+    result: IteratorResult<any>
+    current: any
     constructor(obj: any) {
         obj = obj || [];
         if (obj[Symbol.iterator]) {
@@ -884,11 +884,11 @@ class Iterator {
         }
         this.next();
     }
-    
+
     hasNext() {
         return !this.result.done;
     }
-    
+
     next() {
 
         this.result = this.iter.next();
