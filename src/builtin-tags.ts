@@ -2,9 +2,14 @@
  * Copyright 2016 otpl-node Author. All rights reserved.
  *--------------------------------------------------------*/
 
+/// <reference path="../typings/main.d.ts" />
+
+import * as path from 'path';
+
 import * as ast from './ast';
-import {Parser} from './parser';
 import * as lexer from './lexer';
+import * as utils from './utils';
+import {Parser} from './parser';
 
 
 function mbk(tags: string[], keep?: boolean) {
@@ -17,11 +22,10 @@ export default {
         tok = parser.expectType(lexer.TOKEN_STRING, 'parseLayout:', tok);
 
         let src = tok.value;
-        // if(src.charAt(0) !== '/'){
-        // 	//console.log(path.dirname(this.options.filename),this.options.filename);
-        // 	node.src = path.join(path.dirname(parser.options.filename),node.src);
-        // }
-        // src = util.viewpath(node.src,parser.options.viewPath);
+        if(src.charAt(0) !== '/'){
+			src = path.join(path.dirname(parser.options.file),src);
+		}
+		src = utils.canonicalViewPath(src,parser.options.viewPath,parser.options.viewExt);
 
         let node = new ast.Layout(tok.line, tok.column, src);
 
@@ -35,11 +39,10 @@ export default {
         tok = parser.expectType(lexer.TOKEN_STRING, 'parseInclude:', tok);
 
         let src = tok.value;
-        // if(src.charAt(0) !== '/'){
-        // 	//console.log(path.dirname(this.options.filename),this.options.filename);
-        // 	node.src = path.join(path.dirname(parser.options.filename),node.src);
-        // }
-        // src = util.viewpath(node.src,parser.options.viewPath);
+        if(src.charAt(0) !== '/'){
+			src = path.join(path.dirname(parser.options.file),src);
+		}
+		src = utils.canonicalViewPath(src,parser.options.viewPath,parser.options.viewExt);
 
         let node = new ast.Include(tok.line, tok.column, src);
 

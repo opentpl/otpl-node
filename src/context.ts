@@ -118,11 +118,11 @@ export default class Context {
         var uid = utils.md5(src);
         var dst = path.join(this.env.targetPath, uid + '.otc');
         if (this.env.debug) {
-            this.compiler.compile(path.join(this.env.root,src), dst); //如果是调试模式，则始终重新编译
+            this.compiler.compile(src, dst); //如果是调试模式，则始终重新编译
         }
         loader = Loader.open(dst, this.env);
         if (loader && !this.env.debug && !loader.isValid()) {
-            this.compiler.compile(path.join(this.env.root,src), dst);
+            this.compiler.compile(src, dst);
         }
         return loader;
     }

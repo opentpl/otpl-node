@@ -10,6 +10,8 @@ import Tags from './builtin-tags'
 interface Options {
     file: string
     mtime: number
+    viewExt:string
+    viewPath:string
 }
 /**
  * 表示一个断点
@@ -29,7 +31,7 @@ export class Parser {
 
     tagParsers: Map<string, (tok: lexer.Token, parser: Parser) => ast.Node> = new Map()
 
-    constructor(private tokenizer: lexer.Tokenizer, private options: Options) {
+    constructor(private tokenizer: lexer.Tokenizer, public options: Options) {
 
     }
 

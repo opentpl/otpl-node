@@ -24,13 +24,13 @@ export class Compiler {
     /**
      * 编译一个文件
      */
-    compile(filename: string, dst: string) {
+    compile(src: string, dst: string) {
 
         try {
             fs.unlinkSync(dst);
         } catch (err) { }
         fs.writeFileSync(dst, new Buffer(0));
-
+        let filename=path.join(this.env.root,src);
         let tpl = fs.readFileSync(filename, utils.Encoding.UTF8).toString().replace(/^\uFEFF/, '');//移除所有 UTF-8 BOM 
 
         let buf = new Array<ops.Opcode>();
@@ -39,7 +39,7 @@ export class Compiler {
         try {
             writer = new Writer(fs.openSync(dst, 'w'));
             
-            parser.parse(tpl, {file:filename,mtime:fs.statSync(filename).mtime.getTime()}).compile(buf);
+            parser.parse(tpl, {file:src,mtime:fs.statSync(filename).mtime.getTime(),viewPath:this.env.viewPath,viewExt:this.env.viewExt}).compile(buf);
 
             for (let op of buf) {
                 op.updatePtr(ptr++);
