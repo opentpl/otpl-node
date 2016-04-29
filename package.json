@@ -5,7 +5,7 @@
   "main": "dst/index.js",
   "scripts": {
     "install": "tsc -p .",
-    "reinstall": "tsc -p .",
+    "update": "tsc -p .",
     "test": "node ./test/index.js"
   },
   "repository": {
