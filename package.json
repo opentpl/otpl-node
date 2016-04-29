@@ -4,8 +4,9 @@
   "description": "OTPL for Nodejs",
   "main": "dst/index.js",
   "scripts": {
-    "install": "tsc -p tsconfig.json",
-    "test": "node test"
+    "install": "tsc -p .",
+    "reinstall": "tsc -p .",
+    "test": "node ./test/index.js"
   },
   "repository": {
     "type": "git",

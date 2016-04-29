@@ -1,14 +1,16 @@
 {
     "compileOnSave": true,
     "compilerOptions": {
-        "module": "amd",
+        "module": "commonjs",
+        "target": "es6",
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
-        "outFile": "dst/index.js",
-        "sourceMap": true
+        "outDir": "dst",
+        "sourceMap": false
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "typings"
     ]
 }
