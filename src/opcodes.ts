@@ -868,11 +868,10 @@ class Iterator {
     result: IteratorResult<any>
     current: any
     constructor(obj: any) {
-        obj = obj || [];
-        if (obj[Symbol.iterator]) {
+        if (obj && obj[Symbol.iterator]) {
             this.iter = obj;
         }
-        else if (typeof obj === 'object') {
+        else if (obj && typeof obj === 'object') {
             this.iter = (function* () {
                 let keys = Object.keys(obj).sort();
                 let index = 0;

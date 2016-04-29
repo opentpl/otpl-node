@@ -15,9 +15,9 @@ import * as opc from './opcodes';
  */
 export default class Loader {
     private fd: number
-    private pos: number=0;
+    private pos: number = 0;
     private buf = new Buffer(9)
-    private _src:string
+    private _src: string
 
     version: number
     encoding: utils.Encoding
@@ -29,11 +29,11 @@ export default class Loader {
     get src(): string {
         return this._src;
     }
-    close() { 
+    close() {
         try {
             fs.closeSync(this.fd);
         } catch (err) {
-            
+
         }
     }
 
@@ -63,8 +63,8 @@ export default class Loader {
         }
         return this.buf;
     }
-    
-    readByte(){
+
+    readByte() {
         if (this.read(this.buf, 0, 1) !== 1) {
             this.fail('Failed to read byte.');
         }
@@ -104,23 +104,23 @@ export default class Loader {
         }
         return '';
     }
-    
-    readBool(){
-        let b=this.readByte();
-        if (b===0x0) {
+
+    readBool() {
+        let b = this.readByte();
+        if (b === 0x0) {
             return false;
         }
         return true;
     }
-    private _isLoadedHeader=false;
+    private _isLoadedHeader = false;
     /**
      * 获取文件头
      */
     loadHeader() {
         if (this._isLoadedHeader) {
-            return ;
+            return;
         }
-        this._isLoadedHeader=true;
+        this._isLoadedHeader = true;
         let buf = this.readHead();
         let productName = buf.toString(utils.Encoding.ASCII.name, 0, 7);    //otpl-il
         this.version = buf.readUInt8(7); 		                            //02
@@ -131,24 +131,32 @@ export default class Loader {
 
     }
 
-    codes:opc.Opcode[]=[];
-    next(){
+    codes: Map<number, opc.Opcode> = new Map();
+    next() {
         let buf = this.readHead();
-        let code=opc.load(this,buf);
-        this.codes[code.ptr]=code;
-		return code;
+        let code = opc.load(this, buf);
+        if (code) {
+            this.codes.set(code.ptr, code);
+        }
+        return code;
     }
 
     load(ptr: number) {
-        let code = this.codes[ptr];
-        if (!code) {
-            while ((code=this.next())) {
-                if (code.ptr===ptr) {
+        if (this.codes.has(ptr)) {
+            return this.codes.get(ptr);
+        }
+        else {
+            while (true) {
+                let code = this.next();
+                if (code && code.ptr == ptr) {
                     return code;
+                }
+                else if (!code) {
+                    break;
                 }
             }
         }
-        return null;
+        return this.codes.get(ptr);
     }
 
     static open(file: string, env: Env): Loader {
@@ -164,28 +172,28 @@ export default class Loader {
 
         return null;
     }
-    blocks:Map<string,opc.Block>=new Map()
-    bodyPtr:number
-    bodyLoader:Loader
-    setBlock(id:string,block:opc.Block) {
-        this.blocks.set(id,block);
+    blocks: Map<string, opc.Block> = new Map()
+    bodyPtr: number
+    bodyLoader: Loader
+    setBlock(id: string, block: opc.Block) {
+        this.blocks.set(id, block);
     }
-    getBlock(id:string):opc.Block{
+    getBlock(id: string): opc.Block {
         return this.blocks.get(id);
     }
     /**
      * 设置子模板的加载器和开始地址
      */
-	setBody(loader:Loader,ptr:number){
-		
-		this.bodyLoader = loader;
-		this.bodyPtr = ptr;
+    setBody(loader: Loader, ptr: number) {
 
-		for(var id in loader.blocks){
-            this.blocks.set(id,loader.blocks.get(id));
-		}
-		loader.blocks = this.blocks;
+        this.bodyLoader = loader;
+        this.bodyPtr = ptr;
 
-	}
+        for (var id in loader.blocks) {
+            this.blocks.set(id, loader.blocks.get(id));
+        }
+        loader.blocks = this.blocks;
+
+    }
 
 }
