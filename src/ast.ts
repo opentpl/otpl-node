@@ -463,7 +463,7 @@ export class Method extends Node {
             (<Property>this.body).getMethod = true;
             this.body.compile(buf);
         }
-        else if (this.body instanceof Symbol) {
+        else if (this.body instanceof Identifier) {
             (new String((<Identifier>this.body).value)).compile(buf);//直接写入函数名称
         }
 
