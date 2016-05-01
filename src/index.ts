@@ -35,9 +35,9 @@ export let env: Env = {
 
 
 /**
- * 初始化 OTPL
+ * 配置并初始化 OTPL
  */
-export function init(rootDir: string, _env: Env) {
+export function config(rootDir: string, _env: Env) {
     env = (_env || env);
 
     var stat = fs.statSync(rootDir);
