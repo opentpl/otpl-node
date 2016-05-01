@@ -45,8 +45,12 @@ app.use(function *(next){
 	yield next;
 });
 
-router.use(function *(next){
+app.use(function *(next){
     this.otpl('index',{foo:'bar'}) // /views/index.otpl.html
 })
+
+app.listen(3000,function(err){
+	console.log('serve on port: 3000');
+});
 
 ```
