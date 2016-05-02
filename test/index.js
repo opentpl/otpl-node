@@ -7,7 +7,7 @@ var env={
 
 otpl.init(__dirname,env)
 
-otpl.render('index.otpl',{},(err,result)=>{
+otpl.render('index',{},(err,result)=>{
     if(err){
         throw err
     }
