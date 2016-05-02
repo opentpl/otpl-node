@@ -1,4 +1,6 @@
 # otpl-node
+[![Build Status](https://travis-ci.org/diosay/otpl-node.svg?branch=master)](https://travis-ci.org/diosay/otpl-node)
+
 OTPL for Nodejs (Typescript)
 
 
