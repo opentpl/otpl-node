@@ -869,7 +869,7 @@ class Iterator {
     current: any
     constructor(obj: any) {
         if (obj && obj[Symbol.iterator]) {
-            this.iter = obj;
+            this.iter = obj[Symbol.iterator]();
         }
         else if (obj && typeof obj === 'object') {
             this.iter = (function* () {

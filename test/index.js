@@ -1,20 +1,93 @@
+"use strict";
 const otpl = require("../dst/index");
 
-var env={
-    debug:true
+const env={
+    debug:true,
+    viewExt:'.otpl.html'
 }
 
 
-otpl.init(__dirname,env)
+otpl.config(__dirname,env)
 
-otpl.render('index',{},(err,result)=>{
-    if(err){
-        throw err
-    }
-    console.log(result)
-})
 
-// const op = require("../dst/opcodes");
+const data={
+    header:'Hello OTPL!',
+    items: [
+        {
+            current: true,
+            name: 'James'
+        },
+        {
+            name: 'Foo',
+            url: 'http://example.com'
+        },
+        {
+            name: 'Foo',
+            url: 'http://example.com'
+        },
+        {
+            name: 'Foo',
+            url: 'http://example.com'
+        },
+        {
+            name: 'Foo',
+            url: 'http://example.com'
+        },
+        {
+            name: 'Foo',
+            url: 'http://example.com'
+        },
+        {
+            name: 'Foo',
+            url: 'http://example.com'
+        },
+        {
+            name: 'Foo',
+            url: 'http://example.com'
+        },
+        {
+            name: 'Foo',
+            url: 'http://example.com'
+        },
+        {
+            name: 'Foo',
+            url: 'http://example.com'
+        },
+        {
+            name: 'Foo',
+            url: 'http://example.com'
+        },
+        {
+            name: 'Foo',
+            url: 'http://example.com'
+        }
+    ]
+}
 
-// var code =op.load()
-// console.log(code)
+
+function testDev() {
+    otpl.render('index',data,(err,result)=>{
+        if(err){
+            throw err
+        }
+        console.log(result)
+    })
+}
+
+function testCase() {
+    otpl.render('case',data,(err,result)=>{
+        if(err){
+            throw err
+        }
+        console.log(result)
+    })
+}
+
+let args = process.argv.splice(2);
+if(args.indexOf('--dev')>-1){
+    testDev();
+}
+else{
+    testCase();
+}
+console.log('end')

@@ -13,6 +13,23 @@ export function str(/*...args:any[]*/) {
     return args.join('');
 }
 
+/**
+ * 计算一个值的长度
+ */
+export function len(value:any) {
+    if (Array.isArray(value) || typeof value == 'string') {
+        return value.length;
+    }
+    else if (value) {
+        let count=1;
+        for(let tmp of value){
+            count++;
+        }
+        return count;
+    }
+    return -1;
+}
+
 export function* range(start: number, stop: number, step: number) {
     if (stop === undefined && step === undefined) {
         stop = start;
