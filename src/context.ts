@@ -89,6 +89,7 @@ export default class Context {
         if (this.parent) {
             this.current=this.parent;
             this.destory();
+            this.parent=null;
         }
         else{
             this.current = this;
@@ -96,17 +97,17 @@ export default class Context {
         return this.current;
     }
 
-    /**
-     * 设置一个载入器
-     */
-    setLoader(loader: Loader) {
-        if (this.parent) {
-            this.parent.setLoader(loader);
-        }
-        else {
-            this.loaders.set(loader.src, loader);
-        }
-    }
+    // /**
+    //  * 设置一个载入器
+    //  */
+    // setLoader(loader: Loader) {
+    //     if (this.parent) {
+    //         this.parent.setLoader(loader);
+    //     }
+    //     else {
+    //         this.loaders.set(loader.src, loader);
+    //     }
+    // }
     /**
      * 获取一个载入器
      */
@@ -133,6 +134,9 @@ export default class Context {
             }
             this.compiler.compile(src, dst);
             loader = Loader.open(dst, this.env);
+        }
+        if (loader) {
+            this.loaders.set(id,loader);
         }
         return loader;
     }

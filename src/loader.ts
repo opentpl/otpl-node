@@ -160,17 +160,29 @@ export default class Loader {
     }
 
     static open(file: string, env: Env): Loader {
+        let fd=0;
         try {
-            let loader = new Loader(fs.openSync(file, 'r'), env);
+            fd=fs.openSync(file, 'r');
+        } catch (error) {
+            try {
+                fs.closeSync(fd);
+            } catch (err) {
+                
+            }
+            return null;
+        }
+        let loader = new Loader(fd, env);
+        try {
             loader.loadHeader();
-            return loader;
         } catch (err) {
             if (env.debug) {
                 throw err;
             }
+            loader.close();
+            loader=null;
         }
 
-        return null;
+        return loader;
     }
     blocks: Map<string, opc.Block> = new Map()
     bodyPtr: number
