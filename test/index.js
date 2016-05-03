@@ -18,47 +18,15 @@ const data={
             name: 'James'
         },
         {
-            name: 'Foo',
+            name: 'Foo1',
             url: 'http://example.com'
         },
         {
-            name: 'Foo',
+            name: 'Foo2',
             url: 'http://example.com'
         },
         {
-            name: 'Foo',
-            url: 'http://example.com'
-        },
-        {
-            name: 'Foo',
-            url: 'http://example.com'
-        },
-        {
-            name: 'Foo',
-            url: 'http://example.com'
-        },
-        {
-            name: 'Foo',
-            url: 'http://example.com'
-        },
-        {
-            name: 'Foo',
-            url: 'http://example.com'
-        },
-        {
-            name: 'Foo',
-            url: 'http://example.com'
-        },
-        {
-            name: 'Foo',
-            url: 'http://example.com'
-        },
-        {
-            name: 'Foo',
-            url: 'http://example.com'
-        },
-        {
-            name: 'Foo',
+            name: 'Foo3',
             url: 'http://example.com'
         }
     ]
