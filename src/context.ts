@@ -14,7 +14,7 @@ import * as utils from './utils';
  * 表示一个运行时上下文
  */
 export default class Context {
-    private parent: Context
+    
     current: Context
     private output: string
 
@@ -24,13 +24,14 @@ export default class Context {
     data: any
     stack: Array<any> = new Array()
     locals: Map<string, any> = new Map()
-    loaders: Map<string, Loader> = new Map()
-    constructor(env: Env, compiler: Compiler,interpreter:Interpreter, data: any) {
+    loaders: Map<string, Loader>;
+    constructor(env: Env, compiler: Compiler,interpreter:Interpreter, data: any,private parent?: Context) {
         this.env = env;
         this.compiler = compiler;
         this.interpreter=interpreter;
         this.data = data;
         this.current=this;
+        this.loaders = parent? parent.loaders:new Map();
     }
     /**
      * 从栈中弹出一个元素
@@ -78,15 +79,20 @@ export default class Context {
      * 创建一个新的作用域
      */
     scope(): Context {
-        this.current = new Context(this.env, this.compiler,this.interpreter, this.data);
-        this.current.parent = this;
+        this.current = new Context(this.env, this.compiler,this.interpreter, this.data,this);
         return this.current;
     }
     /**
      * 移除一个作用域
      */
     unscope(): Context {
-        this.current = (this.current.parent || this.current) || this;
+        if (this.parent) {
+            this.current=this.parent;
+            this.destory();
+        }
+        else{
+            this.current = this;
+        }
         return this.current;
     }
 
@@ -117,12 +123,16 @@ export default class Context {
 
         var uid = utils.md5(src);
         var dst = path.join(this.env.targetPath, uid + '.otc');
-        if (this.env.debug) {
-            this.compiler.compile(src, dst); //如果是调试模式，则始终重新编译
+        if (this.env.debug) {//如果是调试模式，则始终重新编译
+            this.compiler.compile(src, dst);
         }
         loader = Loader.open(dst, this.env);
-        if (loader && !this.env.debug && !loader.isValid()) {
+        if (!loader || (loader && !loader.isValid())) {
+            if (loader) {
+                loader.close();
+            }
             this.compiler.compile(src, dst);
+            loader = Loader.open(dst, this.env);
         }
         return loader;
     }
@@ -147,8 +157,14 @@ export default class Context {
      * 
      */
     destory() {
+        this.locals=null;
+        this.compiler=null;
+        this.interpreter=null;
+        this.env=null;
+        this.stack=null;
+        
         if (this.parent) {
-            this.parent.destory();
+            return;
         }
         for (var entry of this.loaders) {
             if (entry[1]) {
