@@ -1,5 +1,6 @@
 # otpl-node
-[![Build Status](https://travis-ci.org/diosay/otpl-node.svg?branch=master)](https://travis-ci.org/diosay/otpl-node)
+
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
 OTPL for Nodejs (Typescript)
 
@@ -56,3 +57,18 @@ app.listen(3000,function(err){
 });
 
 ```
+
+
+[downloads-image]: https://img.shields.io/npm/dm/otpl.svg
+
+[npm-url]: https://www.npmjs.com/package/otpl
+[npm-image]: https://img.shields.io/npm/v/otpl.svg
+
+[travis-url]: https://travis-ci.org/gulpjs/gulp
+[travis-image]: https://img.shields.io/travis/gulpjs/gulp.svg
+
+[coveralls-url]: https://coveralls.io/r/diosay/otpl-node
+[coveralls-image]: https://img.shields.io/coveralls/diosay/otpl-node/master.svg
+
+[gitter-url]: https://gitter.im/diosay/otpl-node
+[gitter-image]: https://badges.gitter.im/diosay/otpl-node.png
