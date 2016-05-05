@@ -12,7 +12,7 @@ OTPL for Nodejs (Typescript)
 ## 安装
 
 ```bash
-$ npm install -g typescript
+$ npm install -g typescript #仅开发时需要
 $ npm install --save otpl
 
 ```
