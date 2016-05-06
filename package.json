@@ -4,7 +4,7 @@
   "description": "OTPL for Nodejs",
   "main": "dst/index.js",
   "scripts": {
-    "test": "tsc -p . && node ./test/index.js",
+    "test": "node ./clean.js && tsc -p . && node ./test/index.js",
     "prepublish": "node ./clean.js && tsc -p ."
   },
   "repository": {
