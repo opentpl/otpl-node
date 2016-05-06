@@ -1,3 +1,8 @@
+
+## 开发依赖
+$ npm install -g typescript
+$ npm install -g typings
+
 ## TS 代码编写说明
 
 1、类继承构造函数必须显示调用，否则编译后NODE不能执行。

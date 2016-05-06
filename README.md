@@ -2,20 +2,18 @@
 
 [![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
-OTPL for Nodejs (Typescript)
+OTPL for Nodejs (Typescript). 
 
 
 
+## OTPL规范
 
-
-
+[OTPL Specification](https://github.com/diosay/open-tpl).
 
 ## 安装
 
 ```bash
-$ npm install -g typescript #仅开发时需要
 $ npm install --save otpl
-
 ```
 
 ## 用例
