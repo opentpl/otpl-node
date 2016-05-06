@@ -6,9 +6,11 @@ OTPL for Nodejs (Typescript).
 
 
 
-## OTPL规范
+## OTPL规范/文档
 
-[OTPL Specification](https://github.com/diosay/open-tpl).
+[OTPL Spec](https://github.com/diosay/open-tpl).
+
+[Developer Doc](https://github.com/diosay/otpl-node/blob/master/src/README.md).
 
 ## 安装
 
