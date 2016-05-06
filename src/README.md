@@ -1,7 +1,23 @@
+# 开发者文档
 
 ## 开发依赖
-$ npm install -g typescript
-$ npm install -g typings
+$ npm install -g typescript //https://www.typescriptlang.org/
+
+$ npm install -g typings //https://github.com/typings/typings
+
+## 目录结构
+
+	|	README.md							//说明文档
+	|	.gitignore							//GIT 忽略列表
+	\---dst									//ts编译后的目标目录，也是发布到npm的主要代码。注：该目录禁止放置任何文件。
+	\---src									//源码目录(typescript)
+	|	|	README.md                       //开发者文档
+	|	|	*.ts
+	\---test
+	|	\---data							//ark框架运行时目录，必须有可读写权限。如果目录不存在则会尝试自动创建。
+	|	|	index.js						//配置文件，可自定义。
+	|		
+	\---typings								//typescript “头”文件目录。
 
 ## TS 代码编写说明
 

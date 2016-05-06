@@ -1,3 +1,7 @@
+/*---------------------------------------------------------
+ * Copyright 2016 otpl-node Author. All rights reserved.
+ *--------------------------------------------------------*/
+
 var fs = require('fs')
 
 var root = __dirname + '/dst'
