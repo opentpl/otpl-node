@@ -13,8 +13,9 @@ $ npm install -g typings //https://github.com/typings/typings
 	\---src									//源码目录(typescript)
 	|	|	README.md                       //开发者文档
 	|	|	*.ts
-	\---test
-	|	\---data							//ark框架运行时目录，必须有可读写权限。如果目录不存在则会尝试自动创建。
+	\---test								//测试代码目录
+	|	\---data							//运行时数据目录
+	|	\---view							//模板目录
 	|	|	index.js						//配置文件，可自定义。
 	|		
 	\---typings								//typescript “头”文件目录。
