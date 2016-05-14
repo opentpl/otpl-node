@@ -2,6 +2,18 @@
  * Copyright 2016 otpl-node Author. All rights reserved.
  *--------------------------------------------------------*/
 
+
+export default function (funcName: string) {
+    let fn = this[funcName];
+    if (fn && typeof fn == 'function') {
+        return fn;
+    }
+    return null;
+}
+
+/**
+ * 字符串转换或连接
+ */
 export function str(/*...args:any[]*/) {
     let args:any[]=[];
     for (let key in arguments) {
@@ -30,6 +42,9 @@ export function len(value:any) {
     return -1;
 }
 
+/**
+ * range 迭代器
+ */
 export function* range(start: number, stop: number, step: number) {
     if (stop === undefined && step === undefined) {
         stop = start;
@@ -46,11 +61,27 @@ export function* range(start: number, stop: number, step: number) {
     }
 }
 
+/**
+ * 时间格式化
+ * @see https://en.wikipedia.org/wiki/Unix_time
+ */
+export function time(timestamp:number,format:string) {
+    var dt = new Date(timestamp)
 
-export default function (funcName: string) {
-    let fn = this[funcName];
-    if (fn && typeof fn == 'function') {
-        return fn;
+    var o:any = {
+        "M+": dt.getMonth() + 1, //月份 
+        "d+": dt.getDate(), //日 
+        "h+": dt.getHours(), //小时 
+        "m+": dt.getMinutes(), //分 
+        "s+": dt.getSeconds(), //秒 
+        "q+": Math.floor((dt.getMonth() + 3) / 3), //季度 
+        "S": dt.getMilliseconds() //毫秒 
+    };
+    if (/(y+)/.test(format)){
+        format = format.replace(RegExp.$1, (dt.getFullYear() + "").substr(4 - RegExp.$1.length));
     }
-    return null;
+    for (var k in o)
+        if (new RegExp("(" + k + ")").test(format)) format = format.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+    return format;
 }
+
