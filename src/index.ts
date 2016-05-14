@@ -29,7 +29,8 @@ export let env: Env = {
     viewExt: null,
     viewPath: null,
     dataPath: null,
-    targetPath: null
+    targetPath: null,
+    functions:null
 }
 
 
@@ -46,11 +47,13 @@ export function config(rootDir: string, _env: Env) {
     }
 
     env.root = rootDir;
+    
     env.debug = env.debug === true ? true : false;
     env.strictMode = env.strictMode === true ? true : false;
     env.viewExt = env.viewExt || '.html';
     env.viewPath = env.viewPath || './view';
     env.dataPath = env.dataPath || './data';
+    env.functions = env.functions || {};
 
     env.targetPath = path.join(env.root, env.dataPath, '.c');
 

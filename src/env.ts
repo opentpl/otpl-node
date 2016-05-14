@@ -13,6 +13,7 @@
     viewPath: string
     dataPath: string
     targetPath:string
+    functions:any
 }
 
 export default Env;

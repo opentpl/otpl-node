@@ -3,7 +3,12 @@ const otpl = require("../dst/index");
 
 const env={
     debug:true,
-    viewExt:'.otpl.html'
+    viewExt:'.otpl.html',
+    functions:{
+        test:()=>{
+            return "test fn!"
+        }
+    }
 }
 
 

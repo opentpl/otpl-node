@@ -8,8 +8,10 @@ import Env from './env';
 import Loader from './loader';
 import {Compiler} from './compiler';
 import Interpreter from './interpreter';
+import GetBuiltinFunc from './builtin-func';
 import * as path from 'path';
 import * as utils from './utils';
+
 /**
  * 表示一个运行时上下文
  */
@@ -176,6 +178,17 @@ export default class Context {
             }
         }
         this.loaders.clear()
+    }
+    
+    /**
+     * 获取定义的函数
+     */
+    GetFunc(fnName:string):Function{
+        let fn=GetBuiltinFunc(fnName);
+        if (!fn) {
+            fn=this.env.functions[fnName];
+        }
+        return fn;
     }
 
 }
