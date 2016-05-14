@@ -2,8 +2,10 @@
  * Copyright 2016 otpl-node Author. All rights reserved.
  *--------------------------------------------------------*/
 
-
-export default function (funcName: string) {
+/**
+ * 函数导出方法
+ */
+export default function (funcName: string) : Function {
     let fn = this[funcName];
     if (fn && typeof fn == 'function') {
         return fn;
