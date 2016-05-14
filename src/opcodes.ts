@@ -6,7 +6,7 @@ import * as utils from './utils';
 import Loader from './loader';
 import Writer from './writer';
 import Context from './context';
-import GetFunc from './builtin-funcs';
+import GetFunc from './builtin-func';
 
 export enum DataType {
     Null = 0x0000,
