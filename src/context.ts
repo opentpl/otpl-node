@@ -16,24 +16,24 @@ import * as utils from './utils';
  * 表示一个运行时上下文
  */
 export default class Context {
-    
+
     current: Context
     private output: string
 
     env: Env
     compiler: Compiler
-    interpreter:Interpreter
+    interpreter: Interpreter
     data: any
     stack: Array<any> = new Array()
     locals: Map<string, any> = new Map()
     loaders: Map<string, Loader>;
-    constructor(env: Env, compiler: Compiler,interpreter:Interpreter, data: any,private parent?: Context) {
+    constructor(env: Env, compiler: Compiler, interpreter: Interpreter, data: any, private parent?: Context) {
         this.env = env;
         this.compiler = compiler;
-        this.interpreter=interpreter;
+        this.interpreter = interpreter;
         this.data = data;
-        this.current=this;
-        this.loaders = parent? parent.loaders:new Map();
+        this.current = this;
+        this.loaders = parent ? parent.loaders : new Map();
     }
     /**
      * 从栈中弹出一个元素
@@ -59,12 +59,16 @@ export default class Context {
      * 设置本地变量
      */
     setLocal(name: string, value: any) {
-        this.locals.set(name, value);
+        this.locals.set((name + '').toLowerCase(), value);
     }
     /**
      * 获取本地变量
      */
     getLocal(name: string): any {
+        name = (name + '').toLowerCase();
+        if (name == 'viewdata') {
+            return this.data;
+        }
         if (this.locals.get(name) !== undefined) {
             return this.locals.get(name);
         }
@@ -81,7 +85,7 @@ export default class Context {
      * 创建一个新的作用域
      */
     scope(): Context {
-        this.current = new Context(this.env, this.compiler,this.interpreter, this.data,this);
+        this.current = new Context(this.env, this.compiler, this.interpreter, this.data, this);
         return this.current;
     }
     /**
@@ -89,11 +93,11 @@ export default class Context {
      */
     unscope(): Context {
         if (this.parent) {
-            this.current=this.parent;
+            this.current = this.parent;
             this.destory();
-            this.parent=null;
+            this.parent = null;
         }
-        else{
+        else {
             this.current = this;
         }
         return this.current;
@@ -138,7 +142,7 @@ export default class Context {
             loader = Loader.open(dst, this.env);
         }
         if (loader) {
-            this.loaders.set(id,loader);
+            this.loaders.set(id, loader);
         }
         return loader;
     }
@@ -163,12 +167,12 @@ export default class Context {
      * 
      */
     destory() {
-        this.locals=null;
-        this.compiler=null;
-        this.interpreter=null;
-        this.env=null;
-        this.stack=null;
-        
+        this.locals = null;
+        this.compiler = null;
+        this.interpreter = null;
+        this.env = null;
+        this.stack = null;
+
         if (this.parent) {
             return;
         }
@@ -179,14 +183,14 @@ export default class Context {
         }
         this.loaders.clear()
     }
-    
+
     /**
      * 获取定义的函数
      */
-    GetFunc(fnName:string):Function{
-        let fn=GetBuiltinFunc(fnName);
+    GetFunc(fnName: string): Function {
+        let fn = GetBuiltinFunc(fnName);
         if (!fn) {
-            fn=this.env.functions[fnName];
+            fn = this.env.functions[fnName];
         }
         return fn;
     }
