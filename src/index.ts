@@ -11,7 +11,6 @@ import * as utils from './utils';
 import Env from './env';
 import Context from './context';
 import Interpreter from './interpreter';
-import {Runtime} from './runtime';
 import {Compiler} from './compiler';
 
 /**
