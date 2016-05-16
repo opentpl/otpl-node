@@ -65,6 +65,6 @@ function clean(path){
 
 clean(__dirname + '/../lib')
 
-clean(__dirname + '/../typings')
+//clean(__dirname + '/../typings')
 
 console.log('clean completed!')
