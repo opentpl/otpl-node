@@ -2,7 +2,7 @@
   "name": "otpl",
   "version": "0.3.0",
   "description": "OTPL for Nodejs",
-  "main": "dst/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "node ./clean.js && tsc -p . && node ./test/index.js",
     "prepublish": "node ./clean.js && tsc -p ."

@@ -1,9 +1,0 @@
-{
-  "name": "otpl",
-  "version": false,
-  "dependencies": {},
-  "ambientDependencies": {
-    "node": "registry:dt/node#4.0.0+20160412142033",
-    "require": "registry:dt/require#2.1.20+20160316155526"
-  }
-}
