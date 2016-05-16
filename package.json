@@ -1,11 +1,11 @@
 {
   "name": "otpl",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "OTPL for Nodejs",
   "main": "lib/index.js",
   "scripts": {
-    "test": "node ./clean.js && tsc -p . && node ./test/index.js",
-    "prepublish": "node ./clean.js && tsc -p ."
+    "test": "node .build/clean.js && typings install && tsc -p . && node ./test/index.js",
+    "prepublish": "npm test"
   },
   "repository": {
     "type": "git",

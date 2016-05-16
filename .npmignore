@@ -1,9 +1,9 @@
 .vscode
+.build
 test
 src
 typings
 
-clean.js
 .travis.yml
 tsconfig.json
 typings.json

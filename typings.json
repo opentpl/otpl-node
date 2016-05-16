@@ -1,0 +1,8 @@
+{
+  "name": "otpl",
+  "version": false,
+  "dependencies": {},
+  "ambientDependencies": {
+    "node": "registry:dt/node#6.0.0+20160514165920"
+  }
+}
