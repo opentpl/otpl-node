@@ -64,8 +64,8 @@ app.listen(3000,function(err){
 [npm-url]: https://www.npmjs.com/package/otpl
 [npm-image]: https://img.shields.io/npm/v/otpl.svg
 
-[travis-url]: https://travis-ci.org/gulpjs/gulp
-[travis-image]: https://img.shields.io/travis/gulpjs/gulp.svg
+[travis-url]: https://travis-ci.org/diosay/otpl-node
+[travis-image]: https://img.shields.io/travis/diosay/otpl-node.svg
 
 [coveralls-url]: https://coveralls.io/r/diosay/otpl-node
 [coveralls-image]: https://img.shields.io/coveralls/diosay/otpl-node/master.svg
