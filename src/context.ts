@@ -59,26 +59,33 @@ export default class Context {
      * 设置本地变量
      */
     setLocal(name: string, value: any) {
-        this.locals.set((name + '').toLowerCase(), value);
+        this.locals.set((name + '').trim().toLowerCase(), value);
     }
+
     /**
      * 获取本地变量
      */
     getLocal(name: string): any {
-        name = (name + '').toLowerCase();
+        name = (name + '').trim().toLowerCase();
         if (name == 'viewdata') {
             return this.data;
         }
-        if (this.locals.get(name) !== undefined) {
-            return this.locals.get(name);
+        var result = this.locals.get(name)
+
+        if (result === undefined || result === null) {
+            //TODO: 优化效率问题
+            for (let key in this.data) {
+                if ((key + '').toLowerCase() == name) {
+                    result = this.data[key];
+                    break;
+                }
+            }
         }
-        else if (this.data[name] !== undefined) {
-            return this.data[name];
-        }
-        else if (this.parent) {
+
+        if (this.parent && result === undefined || result === null) {
             return this.parent.getLocal(name);
         }
-        return null;
+        return result;
     }
 
     /**
