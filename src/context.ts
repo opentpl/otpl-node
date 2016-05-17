@@ -82,7 +82,7 @@ export default class Context {
             }
         }
 
-        if (this.parent && result === undefined || result === null) {
+        if (this.parent && (result === undefined || result === null)) {
             return this.parent.getLocal(name);
         }
         return result;
