@@ -2,7 +2,7 @@
  * Copyright 2016 otpl-node Author. All rights reserved.
  *--------------------------------------------------------*/
 
-import * as opc from './opcodes';
+import * as opc from './opc';
 
 /**
 * Node
@@ -480,7 +480,7 @@ export class Block extends NodeList {
 
     compile(buf: opc.Opcode[]) {
         var op = new opc.Block(this.line, this.column);
-        op.id = this.id;
+        op.id = (this.id + '').trim().toLowerCase();
         buf.push(op);
         super.compile(buf);
         buf.push(new opc.Exit(this.line, this.column));
@@ -492,10 +492,10 @@ export class BlockCall extends Node {
         super(line, column);
     }
     compile(buf: opc.Opcode[]) {
-
+        this.id = (this.id + '').trim().toLowerCase();
         if (this.id !== 'body') {
-            let sc = new opc.Scope(this.line, this.column);//创建新的作用域
-            sc.restore = false;
+            let sc = new opc.Scope(this.line, this.column);//创建块作用域
+            sc.unscoping = false;
             buf.push(sc);
         }
 
@@ -511,8 +511,8 @@ export class BlockCall extends Node {
 
 
         if (this.id !== 'body') {
-            let sc = new opc.Scope(this.line, this.column);//创建新的作用域
-            sc.restore = true;
+            let sc = new opc.Scope(this.line, this.column);//销毁块作用域
+            sc.unscoping = true;
             buf.push(sc);
         }
 
@@ -592,27 +592,27 @@ export class If extends NodeList {
     }
 }
 
-export class Elif extends NodeList {
-    constructor(line: number, column: number, public condition: Node) {
-        super();
-    }
+// export class Elif extends NodeList {
+//     constructor(line: number, column: number, public condition: Node) {
+//         super();
+//     }
 
-    compile(buf: opc.Opcode[], start: opc.Opcode, end: opc.Opcode) {
+//     compile(buf: opc.Opcode[], start: opc.Opcode, end: opc.Opcode) {
 
-        //计算条件
-        this.condition.compile(buf);
-        let go = new opc.Goto(this.line, this.column);
-        go.flag = opc.Goto.FALSE;
-        go.target = start;
-        buf.push(go);
-        //执行块
-        super.compile(buf);
-        go = new opc.Goto(this.line, this.column);
-        go.flag = opc.Goto.NEVER;
-        go.target = end;
-        buf.push(go);
-    }
-}
+//         //计算条件
+//         this.condition.compile(buf);
+//         let go = new opc.Goto(this.line, this.column);
+//         go.flag = opc.Goto.FALSE;
+//         go.target = start;
+//         buf.push(go);
+//         //执行块
+//         super.compile(buf);
+//         go = new opc.Goto(this.line, this.column);
+//         go.flag = opc.Goto.NEVER;
+//         go.target = end;
+//         buf.push(go);
+//     }
+// }
 
 export class Else extends NodeList {
     constructor(line: number, column: number) {
@@ -673,41 +673,89 @@ export class For extends NodeList {
         let objName = opc.randomName();//obj
         let hasNextName = opc.randomName();
         let nextName = opc.randomName();
+        let setName = opc.randomName();
 
         new Set(this.line, this.column, objName, new Nop()).compile(buf);
+
+        //set hasnext_fn=member('hasNext')
         new Set(this.line, this.column, hasNextName,
             new Property(this.line, this.column,
                 new Identifier(this.line, this.column, objName),
                 new NodeList([new String('hasNext')]))).compile(buf);
 
+        //set next_fn=member('next')
         new Set(this.line, this.column, nextName,
             new Property(this.line, this.column,
                 new Identifier(this.line, this.column, objName),
                 new NodeList([new String('next')]))).compile(buf);
+        //set set_fn=member('next')
+        new Set(this.line, this.column, setName,
+            new Property(this.line, this.column,
+                new Identifier(this.line, this.column, objName),
+                new NodeList([new String('setVariables')]))).compile(buf);
+
+        let hasNext = (target: opc.Opcode, flag: number) => {
+            //执行hasNext方法：
+            //hasNext没有参数
+            let op = new opc.LoadVariable(this.line, this.column);
+            op.name = objName;
+            buf.push(op);
+            op = new opc.LoadVariable(this.line, this.column);
+            op.name = hasNextName;
+            buf.push(op);
+            let call = new opc.Call(this.line, this.column);
+            call.parameters = 0;
+            buf.push(call);
+            //如果结束
+            let go = new opc.Goto(this.line, this.column);
+            go.flag = flag;
+            go.target = target;
+            buf.push(go);
+        }
+
+        if (this.elseBlock) {
+            hasNext(start, opc.Goto.TRUE);
+
+            //执行else块
+            this.elseBlock.compile(buf, start, end)
+
+            let go = new opc.Goto(this.line, this.column);
+            go.flag = opc.Goto.NEVER;
+            go.target = end;
+            buf.push(go);
+        }
+        else {
+            hasNext(end, opc.Goto.FALSE);
+        }
 
         //开始标记
         buf.push(start);
-        //执行方法：
-        //没有参数
+
+        //执行set方法：设置变量的值
+
+        new String(this.keyName).compile(buf);
+        new String(this.valueName).compile(buf);
         let op = new opc.LoadVariable(this.line, this.column);
         op.name = objName;
         buf.push(op);
-        op = new opc.LoadVariable(this.line, this.column);
-        op.name = hasNextName;
-        buf.push(op);
-        let call = new opc.Call(this.line, this.column);
-        call.parameters = 0;
-        buf.push(call);
-        //如果结束
-        let go = new opc.Goto(this.line, this.column);
-        go.flag = opc.Goto.FALSE;
-        go.target = end;
-        buf.push(go);
 
-        new Set(this.line, this.column, this.valueName,
-            new Property(this.line, this.column,
-                new Identifier(this.line, this.column, objName),
-                new NodeList([new String('current')]))).compile(buf);
+        op = new opc.LoadVariable(this.line, this.column);
+        op.name = setName;
+        buf.push(op);
+
+        let call = new opc.Call(this.line, this.column);
+        call.parameters = 2;
+        buf.push(call);
+
+
+        super.compile(buf, start, end); //需要传递开始与结束标签，上下文中 break,continue语句需要使用
+
+        hasNext(end, opc.Goto.FALSE);
+
+        // new Set(this.line, this.column, this.valueName,
+        //     new Property(this.line, this.column,
+        //         new Identifier(this.line, this.column, objName),
+        //         new NodeList([new String('current')]))).compile(buf);
 
         //执行下一个迭代
         //没有参数
@@ -721,13 +769,8 @@ export class For extends NodeList {
         call.parameters = 0;
         buf.push(call);
 
-        super.compile(buf, start, end); //需要传递开始与结束标签，上下文中 break,continue语句需要使用
-
         //回到开始
-        go = new opc.Goto(this.line, this.column);
-        go.flag = opc.Goto.NEVER;
-        go.target = start;
-        buf.push(go);
+        hasNext(start, opc.Goto.TRUE);
         //结束
         buf.push(end);
         //TODO: 删除临时方法

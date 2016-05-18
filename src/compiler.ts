@@ -7,7 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as utils from './utils';
-import * as ops from './opcodes';
+import * as ops from './opc';
 import * as parser from './parser';
 import Env from './env';
 import Loader from './loader';

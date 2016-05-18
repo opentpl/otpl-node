@@ -104,19 +104,19 @@ const TAGS = {
 
         return node;
     },
-    '_elif': (tok: lexer.Token, parser: Parser) => {
-        tok = parser.skipWhitespace();
-        tok = parser.expectValue('(', 'parseElif: ', tok)
+    // '_elif': (tok: lexer.Token, parser: Parser) => {
+    //     tok = parser.skipWhitespace();
+    //     tok = parser.expectValue('(', 'parseElif: ', tok)
 
 
-        let condition = parser.parseExpression();
-        //console.log(node.cond.children[0]);
-        tok = parser.expectValue(')', 'parseElif: ', tok)
-        parser.checkBoundary(tok, 'parseElif:');
-        var node = new ast.Elif(tok.line, tok.column, condition);
-        parser.parseUntil(node, [mbk(['elif'], true), mbk(['else'], true), mbk(['/', 'if'])]);
-        return node;
-    },
+    //     let condition = parser.parseExpression();
+    //     //console.log(node.cond.children[0]);
+    //     tok = parser.expectValue(')', 'parseElif: ', tok)
+    //     parser.checkBoundary(tok, 'parseElif:');
+    //     var node = new ast.Elif(tok.line, tok.column, condition);
+    //     parser.parseUntil(node, [mbk(['elif'], true), mbk(['else'], true), mbk(['/', 'if'])]);
+    //     return node;
+    // },
     '_else': (tok: lexer.Token, parser: Parser, tag: string) => {
         tok = parser.skipWhitespace();
         parser.checkBoundary(tok, 'parseElse:');

@@ -20,7 +20,8 @@ const data={
     items: [
         {
             current: true,
-            name: 'James'
+            name: 'James',
+            url: 'http://example.com'
         },
         {
             name: 'Foo1',
@@ -39,6 +40,7 @@ const data={
 
 
 function testDev() {
+    console.log('test dev:')
     otpl.render('develop',data,(err,result)=>{
         if(err){
             throw err
@@ -48,6 +50,7 @@ function testDev() {
 }
 
 function testCase() {
+    console.log('test case:')
     otpl.render('case',data,(err,result)=>{
         if(err){
             throw err
@@ -63,4 +66,4 @@ if(args.indexOf('--dev')>-1){
 else{
     testCase();
 }
-console.log('end')
+console.log('test end')

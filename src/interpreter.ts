@@ -7,7 +7,7 @@
 import Env from './env';
 import Context from './context';
 import Loader from './loader';
-import * as opc from './opcodes';
+import * as opc from './opc';
 
 export default class Interpreter {
     constructor() {
@@ -25,7 +25,6 @@ export default class Interpreter {
 				break;//debug
 			}
 			ptr = code.exec(context);
-			context = context.current;
 		}
 	}
     

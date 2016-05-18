@@ -700,24 +700,24 @@ export class Scope extends Opcode {
     constructor(line?: number, column?: number) {
         super(line, column);
     }
-    restore = false
+    unscoping = false
     static get code() {
-        return 0x000C;//12 restore
+        return 0x000C;//12 unscoping
     }
 
     gen(out: Writer) {
         super.gen(out, Scope.code);
-        out.writeBool(this.restore);
+        out.writeBool(this.unscoping);
     }
 
     load(loader: Loader): Opcode {
-        this.restore = loader.readBool();
+        this.unscoping = loader.readBool();
         return this;
     }
 
     exec(context: Context): number {
 
-        if (this.restore) {
+        if (this.unscoping) {
             context.unscope();
         }
         else {
@@ -794,7 +794,6 @@ export class BlockCall extends Opcode {
                 console.log('warning: Block not found:%s', this.id);
             }
         }
-
         return this.ptr + 1;
     }
 }
@@ -864,23 +863,20 @@ export class Include extends Opcode {
 
 //迭代器帮助类
 class Iterator {
-    iter: IterableIterator<any>
-    result: IteratorResult<any>
-    current: any
-    constructor(obj: any) {
-        if (obj && obj[Symbol.iterator]) {
-            this.iter = obj[Symbol.iterator]();
-        }
-        else if (obj && typeof obj === 'object') {
-            this.iter = (function* () {
-                let keys = Object.keys(obj).sort();
-                let index = 0;
-                yield { value: { key: keys[index], value: obj[keys[index]] }, done: index++ >= keys.length }
-            })();
-        }
-        else {
-            this.iter = (function* () { yield { value: 'null', done: true } })();//不支持迭代
-        }
+    private iter: IterableIterator<any>
+    private result: IteratorResult<any>
+    private index = -1
+    private keys: string[]
+    constructor(private context: Context) {
+        let obj = context.pop() || {};
+        this.keys = !obj[Symbol.iterator] && typeof obj === 'object' ? Object.keys(obj).sort() : null;
+        this.iter = obj[Symbol.iterator] ? obj[Symbol.iterator]() : (function* (me: Iterator) {
+            if (me.keys) {
+                for (let i = 0; i < me.keys.length; i++) {
+                    yield obj[me.keys[i]];
+                }
+            }
+        })(this);
         this.next();
     }
 
@@ -889,10 +885,17 @@ class Iterator {
     }
 
     next() {
-
+        this.index++;
         this.result = this.iter.next();
-        this.current = this.result.value;
-        return this.result;
+    }
+
+    setVariables(keyName: string, valueName: string) {
+        if (keyName) {
+            this.context.setLocal(keyName, this.keys ? this.keys[this.index] : this.index);
+        }
+        if (valueName) {
+            this.context.setLocal(valueName, this.result.value);
+        }
     }
 }
 
@@ -913,7 +916,7 @@ export class CastToIterator extends Opcode {
     }
 
     exec(context: Context): number {
-        context.push(new Iterator(context.pop()));
+        context.push(new Iterator(context));
         return this.ptr + 1;
     }
 }

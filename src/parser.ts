@@ -2,7 +2,7 @@
  * Copyright 2016 otpl-node Author. All rights reserved.
  *--------------------------------------------------------*/
 
-import * as opc from './opcodes';
+import * as opc from './opc';
 import * as ast from './ast';
 import * as lexer from './lexer';
 import Tags from './builtin-tags'
@@ -647,7 +647,7 @@ export class Parser {
             }
         }
 
-        buf = this.checkAndJust(buf);
+        //buf = this.checkAndJust(buf);
 
         return buf;
 
@@ -663,45 +663,45 @@ export class Parser {
     }
 
 
-    checkAndJust(buf: ast.Node[]) {
-        let result: ast.Node[] = [];
-        let node: ast.Node;
-        while ((node = buf.shift())) {
-            if (node instanceof ast.If) {
-                let ifnode = <ast.If>node;
+    // checkAndJust(buf: ast.Node[]) {
+    //     let result: ast.Node[] = [];
+    //     let node: ast.Node;
+    //     while ((node = buf.shift())) {
+    //         if (node instanceof ast.If) {
+    //             let ifnode = <ast.If>node;
 
-                while (true) {
-                    if (buf.length > 0 && buf[0] && buf[0] instanceof ast.Elif) {
-                        ifnode.items.push(buf.shift());
-                    }
-                    else {
-                        break;
-                    }
-                }
+    //             while (true) {
+    //                 if (buf.length > 0 && buf[0] && buf[0] instanceof ast.Elif) {
+    //                     ifnode.items.push(buf.shift());
+    //                 }
+    //                 else {
+    //                     break;
+    //                 }
+    //             }
 
-                if (buf.length > 0 && buf[0] && buf[0] instanceof ast.Else) {
-                    ifnode.items.push(buf.shift());
-                }
-                result.push(ifnode);
-            }
-            else if (node instanceof ast.For) {
-                let fornode = <ast.For>node;
-                if (buf.length > 0 && buf[0] && buf[0] instanceof ast.Else) {
-                    fornode.elseBlock = buf.shift();
-                }
-                result.push(fornode);
-            }
-            else if (node instanceof ast.Elif || node instanceof ast.Else) {
-                this.fail('语法错误', node.line, node.column);
-            }
-            else {
-                result.push(node);
-            }
-        }
+    //             if (buf.length > 0 && buf[0] && buf[0] instanceof ast.Else) {
+    //                 ifnode.items.push(buf.shift());
+    //             }
+    //             result.push(ifnode);
+    //         }
+    //         else if (node instanceof ast.For) {
+    //             let fornode = <ast.For>node;
+    //             if (buf.length > 0 && buf[0] && buf[0] instanceof ast.Else) {
+    //                 fornode.elseBlock = buf.shift();
+    //             }
+    //             result.push(fornode);
+    //         }
+    //         else if (node instanceof ast.Elif || node instanceof ast.Else) {
+    //             this.fail('语法错误', node.line, node.column);
+    //         }
+    //         else {
+    //             result.push(node);
+    //         }
+    //     }
 
-        return result;
+    //     return result;
 
-    }
+    // }
 
 
 }

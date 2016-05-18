@@ -90,7 +90,7 @@ export function canonicalViewPath(filename: string, base: string, extname: strin
     if (filename.charAt(0) !== '/') {
         filename = path.join(base, filename);
     }
-    if (extname) {
+    if (extname && filename.indexOf(".")<0) {//TODO:需要改成默认后缀
         filename += extname;
     }
     if (filename.charAt(0) !== '/') {

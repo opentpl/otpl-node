@@ -8,7 +8,7 @@ import Env from "./env"
 import {Compiler} from "./compiler"
 import * as fs from 'fs';
 import * as utils from './utils';
-import * as opc from './opcodes';
+import * as opc from './opc';
 
 /**
  * Context
