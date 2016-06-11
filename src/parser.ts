@@ -10,8 +10,6 @@ import Tags from './builtin-tags'
 interface Options {
     file: string
     mtime: number
-    viewExt:string
-    viewPath:string
 }
 /**
  * 表示一个断点

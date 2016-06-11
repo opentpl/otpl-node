@@ -5,89 +5,58 @@
 /// <reference path="../typings/main.d.ts" />
 
 import Env from "./env"
-import {Compiler} from "./compiler"
-import * as fs from 'fs';
-import * as utils from './utils';
-import * as opc from './opc';
+// import {Compiler} from "./compiler"
+import * as fs from 'fs'
+import * as utils from './utils'
+import * as opc from './opc'
 
 /**
- * Context
+ * Loader
  */
 export default class Loader {
-    private fd: number
-    private pos: number = 0;
-    private buf = new Buffer(9)
-    private _src: string
-
-    version: number
+    private offset = 0
+    src: string
     encoding: utils.Encoding
+    version: number
     mtime: number
     endHeaderPtr: number
-    constructor(fd: number, env: Env) {
-        this.fd = fd;
+    constructor(private buf: Buffer) {
     }
-    get src(): string {
-        return this._src;
-    }
-    close() {
-        try {
-            fs.closeSync(this.fd);
-        } catch (err) {
 
+    private fail(msg: string) {
+        throw new Error(msg)
+    }
+
+    read(length: number, msg?: string): Buffer {
+
+        if (this.offset + length > this.buf.length) {
+            this.fail(!msg ? "read buffer error." : msg)
         }
-    }
 
-    fail(msg: string) {
-        throw new Error(msg);
-    }
-
-    isValid(): boolean {
-        return true;
-    }
-
-    read(buf: Buffer, offset: number, length: number): number {
-        let bytesReaad = fs.readSync(this.fd, buf, offset, length, this.pos);
-        if (bytesReaad < 0) {
-            this.fail("read 0 byte");
-        }
-        this.pos += bytesReaad;
-        return bytesReaad;
+        let buf = this.buf.slice(this.offset, this.offset + length)
+        this.offset += length
+        return buf
     }
 
     /**
      * 读取协议行头 9 字节
      */
     readHead() {
-        if (this.read(this.buf, 0, 9) !== 9) {
-            this.fail('Failed to read OTPL-IL head.');
-        }
-        return this.buf;
+        return this.read(9);
     }
 
     readByte() {
-        if (this.read(this.buf, 0, 1) !== 1) {
-            this.fail('Failed to read byte.');
-        }
-        return this.buf.readUInt8(0);
+        return this.read(1, "Failed to read byte.").readUInt8(0);
     }
 
     readInt() {
-        if (this.read(this.buf, 0, 4) !== 4) {
-            this.fail('Failed to read integer.');
-        }
-        return this.buf.readInt32BE(0);
+        return this.read(4, "Failed to read integer.").readInt32BE(0);
     }
     readLong() {
-        if (this.read(this.buf, 0, 8) !== 8) {
-            this.fail('Failed to read long.');
-        }
-        return this.buf.readIntBE(0, 8, true);
+        return this.read(8, "Failed to read long.").readIntBE(0, 8, true);
     }
     readFloat() {
-        if (this.read(this.buf, 0, 8) !== 8) {
-            this.fail('Failed to read float.');
-        }
-        return this.buf.readDoubleBE(0, true);//0-8
+        return this.read(8, "Failed to read float.").readDoubleBE(0, true);//0-8
     }
 
     readString(encoding?: utils.Encoding) {
@@ -95,12 +64,7 @@ export default class Loader {
 
         var length = this.readInt();
         if (length > 0) {
-            var buf = new Buffer(length);
-            var count = this.read(buf, 0, length);
-            if (count !== length) {
-                this.fail('Failed to read string, count ' + length + '/' + count);
-            }
-            return buf.toString(encoding.name, 0, count);
+            return this.read(length, 'Failed to read string, count ' + length).toString(encoding.name, 0, length);
         }
         return '';
     }
@@ -112,26 +76,38 @@ export default class Loader {
         }
         return true;
     }
-    private _isLoadedHeader = false;
-    /**
-     * 获取文件头
-     */
-    loadHeader() {
-        if (this._isLoadedHeader) {
-            return;
-        }
-        this._isLoadedHeader = true;
-        let buf = this.readHead();
-        let productName = buf.toString(utils.Encoding.ASCII.name, 0, 7);    //otpl-il
-        this.version = buf.readUInt8(7); 		                            //02
-        this.encoding = utils.Encoding.valueOf(buf.readUInt8(8));           //utf8
-        this._src = this.readString(utils.Encoding.UTF8);                    //路径统一为utf8
-        this.mtime = this.readLong();                                       //获取生成时间
-        this.endHeaderPtr = this.readInt();                                 //获取头结束地址
 
+    private loadHeader() {
+        let buf = this.readHead()
+        let productName = buf.toString(utils.Encoding.ASCII.name, 0, 7)    //otpl-il
+        this.version = buf.readUInt8(7) 		                           //02
+        this.encoding = utils.Encoding.valueOf(buf.readUInt8(8))           //utf8
+        this.src = this.readString(utils.Encoding.UTF8)                    //路径统一为utf8
+        this.mtime = this.readLong()                                       //获取生成时间
+        this.endHeaderPtr = this.readInt()                                 //获取头结束地址
     }
 
-    codes: Map<number, opc.Opcode> = new Map();
+
+
+    static open(target: string, env: Env, callback: (err: NodeJS.ErrnoException, loader: Loader) => void) {
+        fs.readFile(target, (err, data) => {
+            if (err) {
+                return callback(err, null)
+            }
+            let loader = new Loader(data)
+            try {
+                loader.loadHeader()
+
+                
+
+            } catch (err) {
+                return callback(err, null)
+            }
+            return callback(null, loader)
+        })
+    }
+
+    private codes: Map<number, opc.Opcode> = new Map();
     next() {
         let buf = this.readHead();
         let code = opc.load(this, buf);
@@ -159,31 +135,12 @@ export default class Loader {
         return this.codes.get(ptr);
     }
 
-    static open(file: string, env: Env): Loader {
-        let fd=0;
-        try {
-            fd=fs.openSync(file, 'r');
-        } catch (error) {
-            try {
-                fs.closeSync(fd);
-            } catch (err) {
-                
-            }
-            return null;
-        }
-        let loader = new Loader(fd, env);
-        try {
-            loader.loadHeader();
-        } catch (err) {
-            if (env.debug) {
-                throw err;
-            }
-            loader.close();
-            loader=null;
-        }
 
-        return loader;
+    getStartPtr(start?: number) {
+        start = start || this.endHeaderPtr
+        return start
     }
+
     blocks: Map<string, opc.Block> = new Map()
     bodyPtr: number
     bodyLoader: Loader

@@ -2,10 +2,10 @@
  * Copyright 2016 otpl-node Author. All rights reserved.
  *--------------------------------------------------------*/
 
-import * as utils from './utils';
-import Loader from './loader';
-import Writer from './writer';
-import Context from './context';
+import * as utils from './utils'
+import Loader from './loader'
+import Writer from './writer'
+import Context from './context'
 
 
 export enum DataType {
@@ -16,7 +16,7 @@ export enum DataType {
     Float = 0x0004,
     True = 0x0005,
     False = 0x0006
-};
+}
 
 //https://msdn.microsoft.com/zh-cn/library/6a71f45d(v=vs.140).aspx
 
@@ -86,7 +86,7 @@ export enum Operator {
      */
     Or = 0x000F
 
-};
+}
 
 var rnd_seed_1 = 0
 var rnd_seed_2 = 0
@@ -94,15 +94,15 @@ var rnd_seed_2 = 0
  * 获取一个临时变量名
  */
 export function randomName() {
-    let name = '';
+    let name = ''
     if (rnd_seed_2 > 9007199254740990) {
-        rnd_seed_1++;
-        rnd_seed_2 = 0;
+        rnd_seed_1++
+        rnd_seed_2 = 0
     }
     else {
-        rnd_seed_2++;
+        rnd_seed_2++
     }
-    return `$__rnd${rnd_seed_1}_${rnd_seed_2}`;
+    return `$__rnd${rnd_seed_1}_${rnd_seed_2}`
 }
 
 /**
@@ -119,7 +119,7 @@ export class Opcode {
      * 获取当前操作码的地址
      */
     get ptr(): number {
-        return this._ptr;
+        return this._ptr
     }
 
     /**
@@ -127,12 +127,12 @@ export class Opcode {
      */
     updatePtr(value: number) {
         if (this._ptr > 0) {
-            throw new Error('can not change this ptr');
+            throw new Error('can not change this ptr')
         }
         else if (value <= 0) {
-            throw new Error('ptr value must be > 0');
+            throw new Error('ptr value must be > 0')
         }
-        this._ptr = value;
+        this._ptr = value
     }
 
     /**
@@ -140,28 +140,38 @@ export class Opcode {
      */
     gen(out: Writer, code: number) {
         if (this.ptr <= 0) {
-            throw new Error('指令地址必须大于0：' + this.ptr);
+            throw new Error('指令地址必须大于0：' + this.ptr)
         }
         if (code <= 0 || code >= 255) {
-            throw new Error('指令类型代码必须大于0且小于255：' + code);
+            throw new Error('指令类型代码必须大于0且小于255：' + code)
         }
-        out.writeInt(this.ptr);
-        out.writeInt(this.line || 0);
-        out.writeByte(code);
+        out.writeInt(this.ptr)
+        out.writeInt(this.line || 0)
+        out.writeByte(code)
     }
 
     /**
      * 反序列化
      */
     load(loader: Loader): Opcode {
-        return this;
+        return this
     }
 
     /**
      * 执行该操作码
      */
     exec(context: Context): number {
-        throw new Error('Not Implements');
+        throw new Error('Not Implements')
+    }
+
+    run(context: Context, callback: (err: NodeJS.ErrnoException, next: number) => void) {
+        let ptr = 0
+        try {
+            ptr = this.exec(context)
+            callback(null, ptr)
+        } catch (err) {
+            callback(err, -1)
+        }
     }
 
 }
@@ -170,20 +180,20 @@ export class Opcode {
  * 根据指定编码从载入器载入一个操作码。
  */
 export function load(loader: Loader, buf: Buffer): Opcode {
-    let ptr = buf.readInt32BE(0);
-    let line = buf.readInt32BE(4);
-    let flag = buf.readUInt8(8);
+    let ptr = buf.readInt32BE(0)
+    let line = buf.readInt32BE(4)
+    let flag = buf.readUInt8(8)
     for (var name in this) {
-        let clazz = this[name];
+        let clazz = this[name]
         if (clazz && typeof clazz === 'function' && clazz.code === flag) {
-            let op = <Opcode>(new clazz());
-            op.loader = loader;
-            op.line = line;
-            op.updatePtr(ptr);
-            return op.load(loader);
+            let op = <Opcode>(new clazz())
+            op.loader = loader
+            op.line = line
+            op.updatePtr(ptr)
+            return op.load(loader)
         }
     }
-    throw new Error('opcode 未定义：' + flag);
+    throw new Error('opcode 未定义：' + flag)
 
 }
 
@@ -192,7 +202,7 @@ export function load(loader: Loader, buf: Buffer): Opcode {
  */
 export class Document extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
 
     filename: string
@@ -200,20 +210,20 @@ export class Document extends Opcode {
     endHeader: Opcode
 
     static get code(): number {
-        return 0x0001; //1
+        return 0x0001 //1
     }
 
     gen(out: Writer) {
-        out.writeStringOnly('OTPL-IL', utils.Encoding.ASCII.name);  //头固定格式
-        out.writeByte(0x0002);				                        //版本2
-        out.writeByte(utils.Encoding.UTF8.value);	                //字符编码值
+        out.writeStringOnly('OTPL-IL', utils.Encoding.ASCII.name)  //头固定格式
+        out.writeByte(0x0002)				                        //版本2
+        out.writeByte(utils.Encoding.UTF8.value)	                //字符编码值
 
-        out.writeString(this.filename, utils.Encoding.UTF8.name);   //路径始终使用UTF8编码
-        out.writeLong(this.mtime);                                  //源文件最后更新时间
-        out.writeInt(this.endHeader.ptr);
+        out.writeString(this.filename, utils.Encoding.UTF8.name)   //路径始终使用UTF8编码
+        out.writeLong(this.mtime)                                  //源文件最后更新时间
+        out.writeInt(this.endHeader.ptr)
     }
     exec(context: Context): number {
-        return this.ptr + 1;
+        return this.ptr + 1
     }
 
 }
@@ -223,16 +233,16 @@ export class Document extends Opcode {
  */
 export class Nop extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     static get code(): number {
-        return 0x0002; //2
+        return 0x0002 //2
     }
     gen(out: Writer) {
-        super.gen(out, Nop.code);
+        super.gen(out, Nop.code)
     }
     exec(context: Context): number {
-        return this.ptr + 1;
+        return this.ptr + 1
     }
 }
 
@@ -241,16 +251,16 @@ export class Nop extends Opcode {
  */
 export class Exit extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     static get code(): number {
-        return 0x0003; //3
+        return 0x0003 //3
     }
     gen(out: Writer) {
-        super.gen(out, Exit.code);
+        super.gen(out, Exit.code)
     }
     exec(context: Context): number {
-        return -1;
+        return -1
     }
 }
 
@@ -259,73 +269,73 @@ export class Exit extends Opcode {
  */
 export class LoadConst extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     value: any
     datatype: DataType
     static get code(): number {
-        return 0x0004; //4
+        return 0x0004 //4
     }
 
     gen(out: Writer) {
-        super.gen(out, LoadConst.code);
-        out.writeByte(this.datatype);
+        super.gen(out, LoadConst.code)
+        out.writeByte(this.datatype)
         switch (this.datatype) {
             case DataType.False:
             case DataType.True:
             case DataType.Null:
-                break;
+                break
             case DataType.Float:
-                out.writeFloat(this.value);
-                break;
+                out.writeFloat(this.value)
+                break
             case DataType.Integer:
-                out.writeInt(this.value);
-                break;
+                out.writeInt(this.value)
+                break
             case DataType.Long:
-                out.writeLong(this.value);
-                break;
+                out.writeLong(this.value)
+                break
             case DataType.String:
-                out.writeString(this.value);
-                break;
+                out.writeString(this.value)
+                break
             default:
-                throw "常量类型未定义：" + this.datatype;
+                throw "常量类型未定义：" + this.datatype
         }
     }
 
     load(loader: Loader): Opcode {
 
-        this.datatype = loader.readByte();
+        this.datatype = loader.readByte()
         switch (this.datatype) {
             case DataType.False:
-                this.value = false;
-                break;
+                this.value = false
+                break
             case DataType.True:
-                this.value = false;
-                break;
+                this.value = false
+                break
             case DataType.Null:
-                this.value = null;
-                break;
+                this.value = null
+                break
             case DataType.Float:
-                this.value = loader.readFloat();
-                break;
+                this.value = loader.readFloat()
+                break
             case DataType.Integer:
-                this.value = loader.readInt();
-                break;
+                this.value = loader.readInt()
+                break
             case DataType.Long:
-                this.value = loader.readLong();
-                break;
+                this.value = loader.readLong()
+                break
             case DataType.String:
-                this.value = loader.readString();
-                break;
+                this.value = loader.readString()
+                break
             default:
-                throw "常量类型未定义：" + this.datatype;
+                throw "常量类型未定义：" + this.datatype
         }
-        return this;
+        return this
     }
 
     exec(context: Context): number {
-        context.push(this.value);
-        return this.ptr + 1;
+        context.push(this.value)
+        return this.ptr + 1
     }
 
 }
@@ -336,27 +346,27 @@ export class LoadConst extends Opcode {
  */
 export class LoadVariable extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     name: string
     static get code(): number {
-        return 0x0005; //5
+        return 0x0005 //5
     }
 
     gen(out: Writer) {
-        super.gen(out, LoadVariable.code);
-        out.writeString(this.name);
+        super.gen(out, LoadVariable.code)
+        out.writeString(this.name)
     }
 
     load(loader: Loader): Opcode {
-        super.load(loader);
-        this.name = loader.readString();
-        return this;
+        super.load(loader)
+        this.name = loader.readString()
+        return this
     }
 
     exec(context: Context): number {
-        context.push(context.getLocal(this.name));
-        return this.ptr + 1;
+        context.push(context.getLocal(this.name))
+        return this.ptr + 1
     }
 
 }
@@ -366,26 +376,26 @@ export class LoadVariable extends Opcode {
  */
 export class SetVariable extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     name: string
     static get code(): number {
-        return 0x0006; //6
+        return 0x0006 //6
     }
 
     gen(out: Writer) {
-        super.gen(out, SetVariable.code);
-        out.writeString(this.name);
+        super.gen(out, SetVariable.code)
+        out.writeString(this.name)
     }
 
     load(loader: Loader): Opcode {
-        this.name = loader.readString();
-        return this;
+        this.name = loader.readString()
+        return this
     }
 
     exec(context: Context): number {
-        context.setLocal(this.name, context.pop());
-        return this.ptr + 1;
+        context.setLocal(this.name, context.pop())
+        return this.ptr + 1
     }
 
 }
@@ -395,42 +405,42 @@ export class SetVariable extends Opcode {
  */
 export class Call extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     parameters = 0
     static get code(): number {
-        return 0x0007; //7
+        return 0x0007 //7
     }
     gen(out: Writer) {
-        super.gen(out, Call.code);
-        out.writeInt(this.parameters);
+        super.gen(out, Call.code)
+        out.writeInt(this.parameters)
     }
     load(loader: Loader): Opcode {
-        this.parameters = loader.readInt();
-        return this;
+        this.parameters = loader.readInt()
+        return this
     }
     exec(context: Context): number {
-        let method = context.pop();
-        let obj: any = null;
-        let args: any[] = [];
-        let caller: Function;
+        let method = context.pop()
+        let obj: any = null
+        let args: any[] = []
+        let caller: Function
 
         if (typeof method === 'string') {
-            caller = context.GetFunc(method);
+            caller = context.GetFunc(method)
             if (!caller || typeof caller != 'function') {
-                throw new Error('Function is undefined :' + method);
+                throw new Error('Function is undefined :' + method)
             }
             //内置函数不需要引用对象
         }
         else {
-            caller = <Function>method;
-            obj = context.pop();
+            caller = <Function>method
+            obj = context.pop()
         }
 
         for (let i = 0; i < this.parameters; i++) {
-            args.push(context.pop());
+            args.push(context.pop())
         }
-        args.reverse();
+        args.reverse()
 
         // console.log('method:',method)
         // console.log('arg:',args)
@@ -438,11 +448,11 @@ export class Call extends Opcode {
             context.push(null) //TODO:处理未找到函数的
         }
         else {
-            var result = caller.apply(obj, args);
+            var result = caller.apply(obj, args)
             context.push(result)
             // console.log('fun result',result)
         }
-        return this.ptr + 1;
+        return this.ptr + 1
     }
 }
 
@@ -452,23 +462,23 @@ export class Call extends Opcode {
  */
 export class Print extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     escape = true
     static get code(): number {
-        return 0x0008; //8
+        return 0x0008 //8
     }
     gen(out: Writer) {
-        super.gen(out, Print.code);
-        out.writeBool(this.escape);
+        super.gen(out, Print.code)
+        out.writeBool(this.escape)
     }
     load(loader: Loader): Opcode {
-        this.escape = loader.readBool();
-        return this;
+        this.escape = loader.readBool()
+        return this
     }
     exec(context: Context): number {
         context.print(context.pop(), this.escape)
-        return this.ptr + 1;
+        return this.ptr + 1
     }
 }
 
@@ -477,7 +487,7 @@ export class Print extends Opcode {
  */
 export class Operation extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     /**
      * 运算符
@@ -485,97 +495,97 @@ export class Operation extends Opcode {
     operator: Operator
 
     static get code(): number {
-        return 0x0009; //9
+        return 0x0009 //9
     }
     gen(out: Writer) {
-        super.gen(out, Operation.code);
-        out.writeByte(this.operator);
+        super.gen(out, Operation.code)
+        out.writeByte(this.operator)
     }
     load(loader: Loader): Opcode {
-        this.operator = loader.readByte();
-        return this;
+        this.operator = loader.readByte()
+        return this
     }
     exec(context: Context): number {
         let left: any
         let right: any
         switch (this.operator) {
             case Operator.Add:
-                right = context.pop();
-                left = context.pop();
-                context.push(left + right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left + right)
+                break
             case Operator.And:
-                right = context.pop();
-                left = context.pop();
-                context.push(left && right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left && right)
+                break
             case Operator.Div:
-                right = context.pop();
-                left = context.pop();
-                context.push(left / right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left / right)
+                break
             case Operator.Eq:
-                right = context.pop();
-                left = context.pop();
-                context.push(left == right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left == right)
+                break
             case Operator.Ge:
-                right = context.pop();
-                left = context.pop();
-                context.push(left >= right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left >= right)
+                break
             case Operator.Gt:
-                right = context.pop();
-                left = context.pop();
-                context.push(left > right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left > right)
+                break
             case Operator.Le:
-                right = context.pop();
-                left = context.pop();
-                context.push(left <= right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left <= right)
+                break
             case Operator.Lt:
-                right = context.pop();
-                left = context.pop();
-                context.push(left < right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left < right)
+                break
             case Operator.Mod:
-                right = context.pop();
-                left = context.pop();
-                context.push(left % right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left % right)
+                break
             case Operator.Mul:
-                right = context.pop();
-                left = context.pop();
-                context.push(left * right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left * right)
+                break
             case Operator.Ne:
-                right = context.pop();
-                left = context.pop();
-                context.push(left != right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left != right)
+                break
             case Operator.Neg:
-                left = context.pop();
-                context.push(-left);
-                break;
+                left = context.pop()
+                context.push(-left)
+                break
             case Operator.Or:
-                right = context.pop();
-                left = context.pop();
-                context.push(left || right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left || right)
+                break
             case Operator.Pos:
-                left = context.pop();
-                context.push(+left);
-                break;
+                left = context.pop()
+                context.push(+left)
+                break
             case Operator.Sub:
-                right = context.pop();
-                left = context.pop();
-                context.push(left - right);
-                break;
+                right = context.pop()
+                left = context.pop()
+                context.push(left - right)
+                break
             default:
-                throw "指定运算符未定义：" + this.operator;
+                throw "指定运算符未定义：" + this.operator
         }
-        return this.ptr + 1;
+        return this.ptr + 1
     }
 }
 
@@ -584,59 +594,59 @@ export class Operation extends Opcode {
  */
 export class Goto extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     flag = 0x0000
     target: Opcode
     private targetPtr: number
     static get code() {
-        return 0x000A;//10 flag targetPtr
+        return 0x000A//10 flag targetPtr
     }
     /**
      * 始终跳转
      */
     static get NEVER() {
-        return 0x0000;
+        return 0x0000
     }
     /**
      * 从栈顶弹出一个元素，如果值为true则跳转
      */
     static get TRUE() {
-        return 0x0001;
+        return 0x0001
     }
     /**
      * 从栈顶弹出一个元素，如果值为false则跳转
      */
     static get FALSE() {
-        return 0x0002;
+        return 0x0002
     }
 
     gen(out: Writer) {
-        super.gen(out, Goto.code);
-        out.writeByte(this.flag);
-        out.writeInt(this.target.ptr);
+        super.gen(out, Goto.code)
+        out.writeByte(this.flag)
+        out.writeInt(this.target.ptr)
     }
 
     load(loader: Loader): Opcode {
-        this.flag = loader.readByte();
-        this.targetPtr = loader.readInt();
-        return this;
+        this.flag = loader.readByte()
+        this.targetPtr = loader.readInt()
+        return this
     }
 
     exec(context: Context): number {
         if (this.flag === 1 || this.flag === 2) {
-            let val = context.pop() || false;
+            let val = context.pop() || false
             if (this.flag == 1 && val === true) {
-                return this.targetPtr;
+                return this.targetPtr
             }
             else if (this.flag == 2 && val === false) {
-                return this.targetPtr;
+                return this.targetPtr
             }
         }
         else if (this.flag === 0) {
-            return this.targetPtr;
+            return this.targetPtr
         }
-        return this.ptr + 1;
+        return this.ptr + 1
     }
 }
 
@@ -645,51 +655,51 @@ export class Goto extends Opcode {
  */
 export class LoadMember extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     parameters = 0
     static get code() {
-        return 0x000B;//11 parameters
+        return 0x000B//11 parameters
     }
 
     gen(out: Writer) {
-        super.gen(out, LoadMember.code);
-        out.writeInt(this.parameters);
+        super.gen(out, LoadMember.code)
+        out.writeInt(this.parameters)
     }
 
     load(loader: Loader): Opcode {
-        this.parameters = loader.readInt();
-        return this;
+        this.parameters = loader.readInt()
+        return this
     }
 
     exec(context: Context): number {
-        let obj = context.pop();
-        let args: any[] = [];
+        let obj = context.pop()
+        let args: any[] = []
 
         for (let i = 0; i < this.parameters; i++) {
-            args.push(context.pop());
+            args.push(context.pop())
         }
-        args.reverse();
+        args.reverse()
 
         if (!obj || this.parameters <= 0) {
-            context.push(null);//TODO:根据模式报错
-            return this.ptr + 1;
+            context.push(null)//TODO:根据模式报错
+            return this.ptr + 1
         }
 
         if (this.parameters > 1) {
-            let caller = obj['get'];
+            let caller = obj['get']
             if (caller && typeof caller == 'function') {
-                context.push(caller.apply(obj, args));
+                context.push(caller.apply(obj, args))
             }
             else {
-                throw "对象不是一个有效果索引器（未实现 get 方法）：" + obj;
+                throw "对象不是一个有效果索引器（未实现 get 方法）：" + obj
             }
         }
         else {
-            context.push(obj[args[0]]);
+            context.push(obj[args[0]])
         }
 
-        return this.ptr + 1;
+        return this.ptr + 1
     }
 }
 
@@ -698,166 +708,165 @@ export class LoadMember extends Opcode {
  */
 export class Scope extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     unscoping = false
     static get code() {
-        return 0x000C;//12 unscoping
+        return 0x000C//12 unscoping
     }
 
     gen(out: Writer) {
-        super.gen(out, Scope.code);
-        out.writeBool(this.unscoping);
+        super.gen(out, Scope.code)
+        out.writeBool(this.unscoping)
     }
 
     load(loader: Loader): Opcode {
-        this.unscoping = loader.readBool();
-        return this;
+        this.unscoping = loader.readBool()
+        return this
     }
 
     exec(context: Context): number {
 
         if (this.unscoping) {
-            context.unscope();
+            context.unscope()
         }
         else {
-            context.scope();
+            context.scope()
         }
 
-        return this.ptr + 1;
+        return this.ptr + 1
     }
 }
 
 export class Block extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     id: string
     static get code() {
-        return 0x000D;//13 id
+        return 0x000D//13 id
     }
 
     gen(out: Writer) {
-        super.gen(out, Block.code);
-        out.writeString(this.id);
+        super.gen(out, Block.code)
+        out.writeString(this.id)
     }
 
     load(loader: Loader): Opcode {
-        this.id = loader.readString();
+        this.id = loader.readString()
 
-        loader.setBlock(this.id, this);
-        return this;
+        loader.setBlock(this.id, this)
+        return this
     }
 
-    exec(context: Context): number {
-        context.interpreter.exec(this.loader, context, this.ptr + 1);
-        return -1;
+    // exec(context: Context): number {
+    //     context.interpreter.exec(this.loader, context, this.ptr + 1)
+    //     return -1
+    // }
+    run(context: Context, callback: (err: NodeJS.ErrnoException, next: number) => void) {
+        context.interpreter.exec(this.loader, context, this.ptr + 1, (err) => {
+            callback(err, -1)
+        })
     }
 }
 
 export class BlockCall extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     id: string
     parameters: number
     static get code() {
-        return 0x000E;//14 id parameters
+        return 0x000E//14 id parameters
     }
 
     gen(out: Writer) {
-        super.gen(out, BlockCall.code);
-        out.writeString(this.id);			//块名称
-        out.writeInt(this.parameters);	//参数数量
+        super.gen(out, BlockCall.code)
+        out.writeString(this.id)			//块名称
+        out.writeInt(this.parameters)	//参数数量
     }
 
     load(loader: Loader): Opcode {
-        this.id = loader.readString();
-        this.parameters = loader.readInt();
-        return this;
+        this.id = loader.readString()
+        this.parameters = loader.readInt()
+        return this
     }
 
-    exec(context: Context): number {
+    run(context: Context, callback: (err: NodeJS.ErrnoException, next: number) => void) {
         if (this.id === 'body') {
-            context.interpreter.exec(this.loader.bodyLoader, context, this.loader.bodyPtr);
+            context.interpreter.exec(this.loader.bodyLoader, context, this.loader.bodyPtr, (err) => {
+                if (err) {
+                    return callback(err, -1)
+                }
 
-            //TODO: 为什么需要这样才能渲染后面部分？
-            context.interpreter.exec(this.loader, context, this.ptr + 1);
-            return -1;
+                // //TODO: 为什么需要这样才能渲染后面部分？
+                context.interpreter.exec(this.loader, context, this.ptr + 1, (err) => {
+                    callback(err, this.ptr + 1)
+                })
+            })
         }
         else {
-            var block = this.loader.getBlock(this.id);
+            let block = this.loader.getBlock(this.id)
             if (block) {
-                block.exec(context);
+                block.run(context, (err, next) => {
+                    if (err) {
+                        return callback(err, -1)
+                    }
+                    return callback(err, this.ptr + 1)
+                })
             }
             else {
-                console.log('warning: Block not found:%s', this.id);
+                console.log('warning: Block not found:%s', this.id)
+                callback(null, this.ptr + 1)
             }
         }
-        return this.ptr + 1;
-    }
-}
-
-export class Layout extends Opcode {
-    constructor(line?: number, column?: number) {
-        super(line, column);
-    }
-    src: string
-    static get code() {
-        return 0x000F;//15 src
-    }
-
-    gen(out: Writer) {
-        super.gen(out, Layout.code);
-        out.writeString(this.src);
-    }
-
-    load(loader: Loader): Opcode {
-        this.src = loader.readString();
-        return this;
-    }
-
-    exec(context: Context): number {
-        var layoutLoader = context.getLoader(this.src, this.loader.src);
-        if (!layoutLoader) {
-            throw 'failed to rendering layout:' + this.src;
-        }
-        layoutLoader.loadHeader();
-        layoutLoader.setBody(this.loader, this.ptr + 1);//设置子模板的加载器和开始地址
-        context.interpreter.exec(layoutLoader, context, layoutLoader.endHeaderPtr);
-
-        return -1;
     }
 }
 
 export class Include extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     src: string
+    isLayout: boolean
     static get code() {
-        return 0x0010;//16 src
+        return 0x0010//16 src
     }
 
     gen(out: Writer) {
-        super.gen(out, Include.code);
-        out.writeString(this.src);
+        super.gen(out, Include.code)
+        out.writeString(this.src)
+        out.writeBool(this.isLayout)
     }
 
     load(loader: Loader): Opcode {
-        this.src = loader.readString();
-        return this;
+        this.src = loader.readString()
+        this.isLayout = loader.readBool()
+        return this
     }
 
-    exec(context: Context): number {
-        var includeLoader = context.getLoader(this.src, this.loader.src);
-        if (!includeLoader) {
-            throw 'failed to rendering include:' + this.src;
-        }
-        includeLoader.loadHeader();
-        context.interpreter.exec(includeLoader, context, includeLoader.endHeaderPtr);
 
-        return this.ptr + 1;
+    run(context: Context, callback: (err: NodeJS.ErrnoException, next: number) => void) {
+        context.load(this.src, this.loader.src, (err, loader) => {
+            if (err) {
+                return callback(err, -1)
+            }
+
+            if (this.isLayout) {
+
+                loader.setBody(this.loader, this.ptr + 1) //设置子模板的加载器和开始地址
+                context.interpreter.exec(loader, context, loader.getStartPtr(), (err) => {
+                    callback(err, -1)
+                })
+
+            }
+            else {
+                context.interpreter.exec(loader, context, loader.getStartPtr(), (err) => {
+                    callback(err, this.ptr + 1)
+                })
+            }
+
+        })
     }
 }
 
@@ -868,56 +877,56 @@ class Iterator {
     private index = -1
     private keys: string[]
     constructor(private context: Context) {
-        let obj = context.pop() || {};
-        this.keys = !obj[Symbol.iterator] && typeof obj === 'object' ? Object.keys(obj).sort() : null;
+        let obj = context.pop() || {}
+        this.keys = !obj[Symbol.iterator] && typeof obj === 'object' ? Object.keys(obj).sort() : null
         this.iter = obj[Symbol.iterator] ? obj[Symbol.iterator]() : (function* (me: Iterator) {
             if (me.keys) {
                 for (let i = 0; i < me.keys.length; i++) {
-                    yield obj[me.keys[i]];
+                    yield obj[me.keys[i]]
                 }
             }
-        })(this);
-        this.next();
+        })(this)
+        this.next()
     }
 
     hasNext() {
-        return !this.result.done;
+        return !this.result.done
     }
 
     next() {
-        this.index++;
-        this.result = this.iter.next();
+        this.index++
+        this.result = this.iter.next()
     }
 
     setVariables(keyName: string, valueName: string) {
         if (keyName) {
-            this.context.setLocal(keyName, this.keys ? this.keys[this.index] : this.index);
+            this.context.setLocal(keyName, this.keys ? this.keys[this.index] : this.index)
         }
         if (valueName) {
-            this.context.setLocal(valueName, this.result.value);
+            this.context.setLocal(valueName, this.result.value)
         }
     }
 }
 
 export class CastToIterator extends Opcode {
     constructor(line?: number, column?: number) {
-        super(line, column);
+        super(line, column)
     }
     static get code() {
-        return 0x0011;//17
+        return 0x0011//17
     }
 
     gen(out: Writer) {
-        super.gen(out, CastToIterator.code);
+        super.gen(out, CastToIterator.code)
     }
 
     load(loader: Loader): Opcode {
-        return this;
+        return this
     }
 
     exec(context: Context): number {
-        context.push(new Iterator(context));
-        return this.ptr + 1;
+        context.push(new Iterator(context))
+        return this.ptr + 1
     }
 }
 
