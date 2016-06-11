@@ -4,10 +4,11 @@
 
 /// <reference path="../typings/main.d.ts" />
 
-import crypto = require('crypto');
-import path = require('path');
+import * as crypto from "crypto"
+import * as fs from "fs"
+import * as path from "path"
 
-var encodings = new Map<string, Encoding>();
+const encodings = new Map<string, Encoding>()
 
 /**
  * 表示一个字符编码
@@ -98,4 +99,9 @@ export function canonicalViewPath(filename: string, base: string, extname: strin
     }
     filename = filename.replace('\\', '/');
     return filename;
+}
+
+class Sor{
+    
+    
 }

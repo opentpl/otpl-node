@@ -2,8 +2,7 @@
 const otpl = require("../lib/index");
 
 const env={
-    debug:true,
-    viewExt:'.otpl.html',
+    debug:false,
     functions:{
         test:()=>{
             return "test fn!"

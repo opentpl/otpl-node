@@ -538,8 +538,9 @@ export class Layout extends Node {
     }
 
     compile(buf: opc.Opcode[]) {
-        var op = new opc.Layout(this.line, this.column);
-        op.src = this.src;
+        var op = new opc.Include(this.line, this.column);
+        op.isLayout = true
+        op.src = this.src
         buf.push(op);
     }
 }
@@ -551,7 +552,8 @@ export class Include extends Node {
 
     compile(buf: opc.Opcode[]) {
         var op = new opc.Include(this.line, this.column);
-        op.src = this.src;
+        op.isLayout = false
+        op.src = this.src
         buf.push(op);
     }
 }

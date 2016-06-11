@@ -22,10 +22,10 @@ const TAGS = {
         tok = parser.expectType(lexer.TOKEN_STRING, 'parseLayout:', tok);
 
         let src = tok.value;
-        if (src.charAt(0) !== '/') {
-            src = path.join(path.dirname(parser.options.file), src);
-        }
-        src = utils.canonicalViewPath(src, parser.options.viewPath, parser.options.viewExt);
+        // if (src.charAt(0) !== '/') {
+        //     src = path.join(path.dirname(parser.options.file), src);
+        // }
+        // src = utils.canonicalViewPath(src, parser.options.viewPath, parser.options.viewExt);
 
         let node = new ast.Layout(tok.line, tok.column, src);
 
@@ -39,10 +39,10 @@ const TAGS = {
         tok = parser.expectType(lexer.TOKEN_STRING, 'parseInclude:', tok);
 
         let src = tok.value;
-        if (src.charAt(0) !== '/') {
-            src = path.join(path.dirname(parser.options.file), src);
-        }
-        src = utils.canonicalViewPath(src, parser.options.viewPath, parser.options.viewExt);
+        // if (src.charAt(0) !== '/') {
+        //     src = path.join(path.dirname(parser.options.file), src);
+        // }
+        // src = utils.canonicalViewPath(src, parser.options.viewPath, parser.options.viewExt);
 
         let node = new ast.Include(tok.line, tok.column, src);
 
