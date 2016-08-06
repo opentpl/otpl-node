@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 const whitespaceChars = ' \n\t\r\u00A0';
-const delimChars = '()[]{}%*-+~/#,:|.<>=!';
+// const delimChars = '()[]{}%*-+~/#@,:|.<>=!';
 const intChars = '0123456789';
 const id_pattern = /[\w_\$]+/;
 
@@ -438,7 +438,7 @@ export class Tokenizer {
                     case ':':
                     case ',':
                     case ';':
-                    case '#':
+                    case '@':
                     case '[':
                     case ']':
                     case '(':

@@ -54,10 +54,10 @@ export default class Writer {
 
     writeBool(val: boolean) {
         if (!val) {
-            this.writeByte(0x0)
+            this.writeByte(0)
         }
         else {
-            this.writeByte(0x1)
+            this.writeByte(1)
         }
     }
 
@@ -97,7 +97,7 @@ export default class Writer {
 			this.length += bit
 		}
 		else if (ty === 'float') {
-			this.buf.writeDoubleBE(num, this.offset)//后面突出多余位数
+			this.buf.writeDoubleBE(num, this.offset, true)//后面突出多余位数
 			this.offset += bit
 			this.length += bit
 		}

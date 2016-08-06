@@ -2,7 +2,7 @@
 const otpl = require("../lib/index");
 
 const env={
-    debug:false,
+    debug:true,
     functions:{
         test:()=>{
             return "test fn!"
@@ -37,6 +37,12 @@ const data={
     ]
 }
 
+// var buf = new Buffer(5)
+// buf.writeIntBE(14,0,4,false)
+// buf.writeUInt8(0x09,4)
+// console.log(buf,"=============",buf.slice(0,4).readInt32BE(0))
+
+// return
 
 function testDev() {
     console.log('test dev:')

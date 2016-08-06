@@ -7,15 +7,38 @@ import Loader from './loader'
 import Writer from './writer'
 import Context from './context'
 
-
+/**
+ * 数据类型
+ */
 export enum DataType {
-    Null = 0x0000,
-    String = 0x0001,
-    Integer = 0x0002,
-    Long = 0x0003,
-    Float = 0x0004,
-    True = 0x0005,
-    False = 0x0006
+    /**
+     * 空
+     */
+    NULL = 0x00,
+    /**
+     * 字符串
+     */
+    STR = 0x01,
+    /**
+     * 整数
+     */
+    INT = 0x02,
+    /**
+     * 长整数
+     */
+    LONG = 0x03,
+    /**
+     * 浮点数
+     */
+    FLOAT = 0x04,
+    /**
+     * 真
+     */
+    TRUE = 0x05,
+    /**
+     * 假
+     */
+    FALSE = 0x06
 }
 
 //https://msdn.microsoft.com/zh-cn/library/6a71f45d(v=vs.140).aspx
@@ -27,64 +50,64 @@ export enum Operator {
     /**
      * 相加
      */
-    Add = 0x0001,
+    Add = 0x01,
     /**
      * 相减
      */
-    Sub = 0x0002,
+    Sub = 0x02,
     /**
      * 相乘
      */
-    Mul = 0x0003,
+    Mul = 0x03,
     /**
      * 相除
      */
-    Div = 0x0004,
+    Div = 0x04,
     /**
      * 取模
      */
-    Mod = 0x0005,
+    Mod = 0x05,
     /**
      * 取负
      */
-    Neg = 0x0006,
+    Neg = 0x06,
     /**
      * 取正
      */
-    Pos = 0x0007,
+    Pos = 0x07,
     /**
      * 逻辑等于
      */
-    Eq = 0x0008,
+    Eq = 0x08,
     /**
      * 逻辑不等于
      */
-    Ne = 0x0009,
+    Ne = 0x09,
     /**
      * 逻辑大于
      */
-    Gt = 0x000A,
+    Gt = 0x0A,
     /**
      * 逻辑大于等于
      */
-    Ge = 0x000B,
+    Ge = 0x0B,
     /**
      * 逻辑小于
      */
-    Lt = 0x000C,
+    Lt = 0x0C,
     /**
      * 逻辑小于等于
      */
-    Le = 0x000D,
-    //Leg = 14,
+    Le = 0x0D,
+    //Leg = 0x014,
     /**
      * 逻辑与
      */
-    And = 0x000E,
+    And = 0x0E,
     /**
      * 逻辑或
      */
-    Or = 0x000F
+    Or = 0x0F
 
 }
 
@@ -146,7 +169,6 @@ export class Opcode {
             throw new Error('指令类型代码必须大于0且小于255：' + code)
         }
         out.writeInt(this.ptr)
-        out.writeInt(this.line || 0)
         out.writeByte(code)
     }
 
@@ -181,14 +203,15 @@ export class Opcode {
  */
 export function load(loader: Loader, buf: Buffer): Opcode {
     let ptr = buf.readInt32BE(0)
-    let line = buf.readInt32BE(4)
-    let flag = buf.readUInt8(8)
+    let flag = buf.readUInt8(4)
+    //let line = buf.readInt32BE(4)
+
     for (var name in this) {
         let clazz = this[name]
         if (clazz && typeof clazz === 'function' && clazz.code === flag) {
             let op = <Opcode>(new clazz())
             op.loader = loader
-            op.line = line
+            //op.line = line
             op.updatePtr(ptr)
             return op.load(loader)
         }
@@ -210,16 +233,18 @@ export class Document extends Opcode {
     endHeader: Opcode
 
     static get code(): number {
-        return 0x0001 //1
+        return 0x01
     }
 
     gen(out: Writer) {
-        out.writeStringOnly('OTPL-IL', utils.Encoding.ASCII.name)  //头固定格式
-        out.writeByte(0x0002)				                        //版本2
-        out.writeByte(utils.Encoding.UTF8.value)	                //字符编码值
+        out.writeStringOnly('OTPL', utils.Encoding.ASCII.name)  //头固定格式
+        out.writeByte(2)				                        //版本2
+        out.writeByte(utils.Encoding.UTF8.value)	            //字符编码值
+        out.writeByte(0)                                        //保留2位
+        out.writeByte(0)
 
-        out.writeString(this.filename, utils.Encoding.UTF8.name)   //路径始终使用UTF8编码
         out.writeLong(this.mtime)                                  //源文件最后更新时间
+        out.writeString(this.filename, utils.Encoding.UTF8.name)   //路径始终使用UTF8编码
         out.writeInt(this.endHeader.ptr)
     }
     exec(context: Context): number {
@@ -236,7 +261,7 @@ export class Nop extends Opcode {
         super(line, column)
     }
     static get code(): number {
-        return 0x0002 //2
+        return 0x02
     }
     gen(out: Writer) {
         super.gen(out, Nop.code)
@@ -247,20 +272,103 @@ export class Nop extends Opcode {
 }
 
 /**
- * 表示终止当前文档的执行。
+ * 表示终止当前文档的执行。过时
  */
-export class Exit extends Opcode {
+// export class Exit extends Opcode {
+//     constructor(line?: number, column?: number) {
+//         super(line, column)
+//     }
+//     static get code(): number {
+//         return 0x000003 //3
+//     }
+//     gen(out: Writer) {
+//         super.gen(out, Exit.code)
+//     }
+//     exec(context: Context): number {
+//         return -1
+//     }
+// }
+
+/**
+ * 表示一个地址跳转
+ */
+export class Break extends Opcode {
     constructor(line?: number, column?: number) {
         super(line, column)
     }
-    static get code(): number {
-        return 0x0003 //3
+    flag = 0
+    target: Opcode
+    private targetPtr: number
+    static get code() {
+        return 0x03
     }
+    static get EXIT() {
+        return 0x01
+    }
+    /**
+     * 始终跳转
+     */
+    static get NEVER() {
+        return 0x02
+    }
+    /**
+     * 从栈顶弹出一个元素，如果值为true则跳转
+     */
+    static get TRUE() {
+        return 0x03
+    }
+    /**
+     * 从栈顶弹出一个元素，如果值为false则跳转
+     */
+    static get FALSE() {
+        return 0x04
+    }
+
     gen(out: Writer) {
-        super.gen(out, Exit.code)
+        super.gen(out, Break.code)
+        out.writeInt(this.line || 0)
+        out.writeByte(this.flag)
+        if (this.flag != Break.EXIT) {
+            out.writeInt(this.target.ptr)
+        }
+
     }
+
+    load(loader: Loader): Opcode {
+        this.line = loader.readInt()
+        this.flag = loader.readByte()
+        if (this.flag == 2 || this.flag == 3 || this.flag == 4) {
+            this.targetPtr = loader.readInt()
+        }
+
+        return this
+    }
+
     exec(context: Context): number {
-        return -1
+        switch (this.flag) {
+            case Break.EXIT:
+                return -1;
+            case Break.NEVER:
+                return this.targetPtr;
+            case Break.TRUE:{
+                let val = context.pop() || false
+                if(val){
+                    return this.targetPtr;
+                }
+                break;
+            }
+            case Break.FALSE:{
+                let val = context.pop() || false
+                if(!val){
+                    return this.targetPtr;
+                }
+                break;
+            }
+            default:
+                throw new Error('类型未定义：'+this.flag)
+
+        }
+        return this.ptr + 1
     }
 }
 
@@ -274,27 +382,28 @@ export class LoadConst extends Opcode {
     value: any
     datatype: DataType
     static get code(): number {
-        return 0x0004 //4
+        return 0x04
     }
 
     gen(out: Writer) {
         super.gen(out, LoadConst.code)
+        out.writeInt(this.line || 0)
         out.writeByte(this.datatype)
         switch (this.datatype) {
-            case DataType.False:
-            case DataType.True:
-            case DataType.Null:
+            case DataType.FALSE:
+            case DataType.TRUE:
+            case DataType.NULL:
                 break
-            case DataType.Float:
+            case DataType.FLOAT:
                 out.writeFloat(this.value)
                 break
-            case DataType.Integer:
+            case DataType.INT:
                 out.writeInt(this.value)
                 break
-            case DataType.Long:
+            case DataType.LONG:
                 out.writeLong(this.value)
                 break
-            case DataType.String:
+            case DataType.STR:
                 out.writeString(this.value)
                 break
             default:
@@ -303,28 +412,28 @@ export class LoadConst extends Opcode {
     }
 
     load(loader: Loader): Opcode {
-
+        this.line = loader.readInt();
         this.datatype = loader.readByte()
         switch (this.datatype) {
-            case DataType.False:
+            case DataType.FALSE:
                 this.value = false
                 break
-            case DataType.True:
+            case DataType.TRUE:
                 this.value = false
                 break
-            case DataType.Null:
+            case DataType.NULL:
                 this.value = null
                 break
-            case DataType.Float:
+            case DataType.FLOAT:
                 this.value = loader.readFloat()
                 break
-            case DataType.Integer:
+            case DataType.INT:
                 this.value = loader.readInt()
                 break
-            case DataType.Long:
+            case DataType.LONG:
                 this.value = loader.readLong()
                 break
-            case DataType.String:
+            case DataType.STR:
                 this.value = loader.readString()
                 break
             default:
@@ -350,16 +459,17 @@ export class LoadVariable extends Opcode {
     }
     name: string
     static get code(): number {
-        return 0x0005 //5
+        return 0x05
     }
 
     gen(out: Writer) {
         super.gen(out, LoadVariable.code)
+        out.writeInt(this.line || 0)
         out.writeString(this.name)
     }
 
     load(loader: Loader): Opcode {
-        super.load(loader)
+        this.line = loader.readInt();
         this.name = loader.readString()
         return this
     }
@@ -380,15 +490,17 @@ export class SetVariable extends Opcode {
     }
     name: string
     static get code(): number {
-        return 0x0006 //6
+        return 0x06
     }
 
     gen(out: Writer) {
         super.gen(out, SetVariable.code)
+        out.writeInt(this.line || 0)
         out.writeString(this.name)
     }
 
     load(loader: Loader): Opcode {
+        this.line = loader.readInt();
         this.name = loader.readString()
         return this
     }
@@ -409,13 +521,15 @@ export class Call extends Opcode {
     }
     parameters = 0
     static get code(): number {
-        return 0x0007 //7
+        return 0x07
     }
     gen(out: Writer) {
         super.gen(out, Call.code)
+        out.writeInt(this.line || 0)
         out.writeInt(this.parameters)
     }
     load(loader: Loader): Opcode {
+        this.line = loader.readInt();
         this.parameters = loader.readInt()
         return this
     }
@@ -466,13 +580,15 @@ export class Print extends Opcode {
     }
     escape = true
     static get code(): number {
-        return 0x0008 //8
+        return 0x08
     }
     gen(out: Writer) {
         super.gen(out, Print.code)
+        out.writeInt(this.line || 0)
         out.writeBool(this.escape)
     }
     load(loader: Loader): Opcode {
+        this.line = loader.readInt();
         this.escape = loader.readBool()
         return this
     }
@@ -495,13 +611,15 @@ export class Operation extends Opcode {
     operator: Operator
 
     static get code(): number {
-        return 0x0009 //9
+        return 0x09
     }
     gen(out: Writer) {
         super.gen(out, Operation.code)
+        out.writeInt(this.line || 0)
         out.writeByte(this.operator)
     }
     load(loader: Loader): Opcode {
+        this.line = loader.readInt();
         this.operator = loader.readByte()
         return this
     }
@@ -589,66 +707,7 @@ export class Operation extends Opcode {
     }
 }
 
-/**
- * 表示一个地址跳转
- */
-export class Goto extends Opcode {
-    constructor(line?: number, column?: number) {
-        super(line, column)
-    }
-    flag = 0x0000
-    target: Opcode
-    private targetPtr: number
-    static get code() {
-        return 0x000A//10 flag targetPtr
-    }
-    /**
-     * 始终跳转
-     */
-    static get NEVER() {
-        return 0x0000
-    }
-    /**
-     * 从栈顶弹出一个元素，如果值为true则跳转
-     */
-    static get TRUE() {
-        return 0x0001
-    }
-    /**
-     * 从栈顶弹出一个元素，如果值为false则跳转
-     */
-    static get FALSE() {
-        return 0x0002
-    }
 
-    gen(out: Writer) {
-        super.gen(out, Goto.code)
-        out.writeByte(this.flag)
-        out.writeInt(this.target.ptr)
-    }
-
-    load(loader: Loader): Opcode {
-        this.flag = loader.readByte()
-        this.targetPtr = loader.readInt()
-        return this
-    }
-
-    exec(context: Context): number {
-        if (this.flag === 1 || this.flag === 2) {
-            let val = context.pop() || false
-            if (this.flag == 1 && val === true) {
-                return this.targetPtr
-            }
-            else if (this.flag == 2 && val === false) {
-                return this.targetPtr
-            }
-        }
-        else if (this.flag === 0) {
-            return this.targetPtr
-        }
-        return this.ptr + 1
-    }
-}
 
 /**
  * 表示一个地址跳转
@@ -659,15 +718,17 @@ export class LoadMember extends Opcode {
     }
     parameters = 0
     static get code() {
-        return 0x000B//11 parameters
+        return 0x0A
     }
 
     gen(out: Writer) {
         super.gen(out, LoadMember.code)
+        out.writeInt(this.line || 0)
         out.writeInt(this.parameters)
     }
 
     load(loader: Loader): Opcode {
+        this.line = loader.readInt();
         this.parameters = loader.readInt()
         return this
     }
@@ -712,7 +773,7 @@ export class Scope extends Opcode {
     }
     unscoping = false
     static get code() {
-        return 0x000C//12 unscoping
+        return 0x0B
     }
 
     gen(out: Writer) {
@@ -744,15 +805,17 @@ export class Block extends Opcode {
     }
     id: string
     static get code() {
-        return 0x000D//13 id
+        return 0x0C
     }
 
     gen(out: Writer) {
         super.gen(out, Block.code)
+        out.writeInt(this.line || 0)
         out.writeString(this.id)
     }
 
     load(loader: Loader): Opcode {
+        this.line = loader.readInt();
         this.id = loader.readString()
 
         loader.setBlock(this.id, this)
@@ -777,16 +840,18 @@ export class BlockCall extends Opcode {
     id: string
     parameters: number
     static get code() {
-        return 0x000E//14 id parameters
+        return 0x0D
     }
 
     gen(out: Writer) {
         super.gen(out, BlockCall.code)
-        out.writeString(this.id)			//块名称
+        out.writeInt(this.line || 0)
+        out.writeString(this.id)		//块名称
         out.writeInt(this.parameters)	//参数数量
     }
 
     load(loader: Loader): Opcode {
+        this.line = loader.readInt();
         this.id = loader.readString()
         this.parameters = loader.readInt()
         return this
@@ -823,25 +888,39 @@ export class BlockCall extends Opcode {
     }
 }
 
-export class Include extends Opcode {
+export class Reference extends Opcode {
     constructor(line?: number, column?: number) {
         super(line, column)
     }
     src: string
-    isLayout: boolean
+    refType: number
     static get code() {
-        return 0x0010//16 src
+        return 0x0E
+    }
+
+    static get INCLUDE() {
+        return 1;
+    }
+
+    static get REQUIRE() {
+        return 2;
+    }
+
+    static get LAYOUT() {
+        return 3;
     }
 
     gen(out: Writer) {
-        super.gen(out, Include.code)
+        super.gen(out, Reference.code)
+        out.writeInt(this.line || 0)
         out.writeString(this.src)
-        out.writeBool(this.isLayout)
+        out.writeByte(this.refType)
     }
 
     load(loader: Loader): Opcode {
+        this.line = loader.readInt();
         this.src = loader.readString()
-        this.isLayout = loader.readBool()
+        this.refType = loader.readByte()
         return this
     }
 
@@ -852,7 +931,8 @@ export class Include extends Opcode {
                 return callback(err, -1)
             }
 
-            if (this.isLayout) {
+            // TODO:
+            if (this.refType == Reference.LAYOUT) {
 
                 loader.setBody(this.loader, this.ptr + 1) //设置子模板的加载器和开始地址
                 context.interpreter.exec(loader, context, loader.getStartPtr(), (err) => {
@@ -913,14 +993,16 @@ export class CastToIterator extends Opcode {
         super(line, column)
     }
     static get code() {
-        return 0x0011//17
+        return 0x0F
     }
 
     gen(out: Writer) {
         super.gen(out, CastToIterator.code)
+        out.writeInt(this.line || 0)
     }
 
     load(loader: Loader): Opcode {
+        this.line = loader.readInt();
         return this
     }
 

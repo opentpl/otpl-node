@@ -324,7 +324,6 @@ export class Parser {
                 break;
             }
         }
-        // this.fail('##############################')
         return node;
     }
 
@@ -518,7 +517,7 @@ export class Parser {
         var raw = false;
         var unRaw = function () { };
 
-        if (tok.value === '#') {
+        if (tok.value === '@') {
             return this.parseBlockCall(this.next);
         }
         else if (tok.value === '!') {

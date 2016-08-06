@@ -6,6 +6,12 @@ $ npm install -g typescript //https://www.typescriptlang.org/
 $ npm install -g typings //https://github.com/typings/typings
 - typings install node --ambient --save
 
+## 国内NPM加速
+npm install -g cnpm --registry=https://registry.npm.taobao.org
+
+## VSCODE 编译
+ctrl+shift+b 
+
 ## 目录结构
 
 	|	README.md							//说明文档

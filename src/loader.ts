@@ -39,10 +39,10 @@ export default class Loader {
     }
 
     /**
-     * 读取协议行头 9 字节
+     * 读取协议行头 5 字节
      */
     readHead() {
-        return this.read(9);
+        return this.read(5);
     }
 
     readByte() {
@@ -53,7 +53,7 @@ export default class Loader {
         return this.read(4, "Failed to read integer.").readInt32BE(0);
     }
     readLong() {
-        return this.read(8, "Failed to read long.").readIntBE(0, 8, true);
+        return this.read(8, "Failed to read long.").readIntBE(0, 8, true);//TODO:类型
     }
     readFloat() {
         return this.read(8, "Failed to read float.").readDoubleBE(0, true);//0-8
@@ -71,19 +71,20 @@ export default class Loader {
 
     readBool() {
         let b = this.readByte();
-        if (b === 0x0) {
+        if (b === 0) {
             return false;
         }
         return true;
     }
 
     private loadHeader() {
-        let buf = this.readHead()
-        let productName = buf.toString(utils.Encoding.ASCII.name, 0, 7)    //otpl-il
-        this.version = buf.readUInt8(7) 		                           //02
-        this.encoding = utils.Encoding.valueOf(buf.readUInt8(8))           //utf8
-        this.src = this.readString(utils.Encoding.UTF8)                    //路径统一为utf8
+        let buf =  this.read(8)
+        let productName = buf.toString(utils.Encoding.ASCII.name, 0, 4)    //otpl-il
+        this.version = buf.readUInt8(4) 		                           //02
+        this.encoding = utils.Encoding.valueOf(buf.readUInt8(5))           //UTF8
+        //2位保留
         this.mtime = this.readLong()                                       //获取生成时间
+        this.src = this.readString(utils.Encoding.UTF8)                    //路径统一为utf8
         this.endHeaderPtr = this.readInt()                                 //获取头结束地址
     }
 

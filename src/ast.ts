@@ -58,32 +58,32 @@ class Primitive extends Node {
 
 export class Float extends Primitive {
     constructor(value: string) {
-        super(value, opc.DataType.Float);
+        super(value, opc.DataType.FLOAT);
     }
 }
 
 export class Integer extends Primitive {
     constructor(value: string) {
-        super(value, opc.DataType.Integer);
+        super(value, opc.DataType.INT);
     }
 }
 
 export class String extends Primitive {
     constructor(value: string) {
-        super(value, opc.DataType.String);
+        super(value, opc.DataType.STR);
     }
 }
 
 export class Boolean extends Primitive {
     constructor(value: any) {
         value = ((value || '') + '').toLowerCase();
-        super(value, value === 'true' ? opc.DataType.True : opc.DataType.False);
+        super(value, value === 'true' ? opc.DataType.TRUE : opc.DataType.FALSE);
     }
 }
 
 export class None extends Primitive {
     constructor() {
-        super('null', opc.DataType.Null);
+        super('null', opc.DataType.NULL);
     }
 }
 
@@ -97,7 +97,7 @@ export class Data extends Node {
     compile(buf: opc.Opcode[]) {
         let op = new opc.LoadConst(this.line, this.column);
         op.value = this.value;
-        op.datatype = opc.DataType.String;
+        op.datatype = opc.DataType.STR;
         buf.push(op);
     }
 }
@@ -161,7 +161,9 @@ export class Root extends NodeList {
         //write body
         super.compile(buf);
         //write exit
-        buf.push(new opc.Exit());
+        let bk=new opc.Break(this.line, this.column);
+        bk.flag=opc.Break.EXIT
+        buf.push(bk)
     }
 }
 /**
@@ -341,19 +343,19 @@ export class Binary extends Node {
                 lv.name = sv.name;
                 buf.push(lv);
                 let ld = new opc.LoadConst(this.line, this.column);
-                ld.datatype = opc.DataType.Null;
+                ld.datatype = opc.DataType.NULL;
                 buf.push(ld);
                 let op = new opc.Operation(this.line, this.column);
                 op.operator = opc.Operator.Eq;
                 buf.push(op);
-                let go = new opc.Goto(this.line, this.column);
-                go.flag = opc.Goto.FALSE;
+                let go = new opc.Break(this.line, this.column);
+                go.flag = opc.Break.FALSE;
                 go.target = start;
                 buf.push(go);
                 //取得表达式2的值
                 this.right.compile(buf);
-                go = new opc.Goto(this.line, this.column);
-                go.flag = opc.Goto.NEVER;
+                go = new opc.Break(this.line, this.column);
+                go.flag = opc.Break.NEVER;
                 go.target = end;
                 buf.push(go);
 
@@ -386,14 +388,14 @@ export class Ternary extends Node {
         let end = new opc.Nop(this.line, this.column);
         //计算条件
         this.condition.compile(buf);
-        let go = new opc.Goto(this.line, this.column);
-        go.flag = opc.Goto.FALSE;
+        let go = new opc.Break(this.line, this.column);
+        go.flag = opc.Break.FALSE;
         go.target = start;
         buf.push(go);
         //计算左值
         this.left.compile(buf);
-        go = new opc.Goto(this.line, this.column);
-        go.flag = opc.Goto.NEVER;
+        go = new opc.Break(this.line, this.column);
+        go.flag = opc.Break.NEVER;
         go.target = end;
         buf.push(go);
         //计算右值
@@ -483,7 +485,9 @@ export class Block extends NodeList {
         op.id = (this.id + '').trim().toLowerCase();
         buf.push(op);
         super.compile(buf);
-        buf.push(new opc.Exit(this.line, this.column));
+        let bk=new opc.Break(this.line, this.column);
+        bk.flag=opc.Break.EXIT
+        buf.push(bk)
     }
 }
 
@@ -538,8 +542,8 @@ export class Layout extends Node {
     }
 
     compile(buf: opc.Opcode[]) {
-        var op = new opc.Include(this.line, this.column);
-        op.isLayout = true
+        var op = new opc.Reference(this.line, this.column);
+        op.refType = opc.Reference.LAYOUT
         op.src = this.src
         buf.push(op);
     }
@@ -551,8 +555,8 @@ export class Include extends Node {
     }
 
     compile(buf: opc.Opcode[]) {
-        var op = new opc.Include(this.line, this.column);
-        op.isLayout = false
+        var op = new opc.Reference(this.line, this.column);
+        op.refType = opc.Reference.INCLUDE
         op.src = this.src
         buf.push(op);
     }
@@ -572,14 +576,14 @@ export class If extends NodeList {
         let end = new opc.Nop(this.line, this.column);
         //计算条件
         this.condition.compile(buf);
-        let go = new opc.Goto(this.line, this.column);
-        go.flag = opc.Goto.FALSE;
+        let go = new opc.Break(this.line, this.column);
+        go.flag = opc.Break.FALSE;
         go.target = start;
         buf.push(go);
         //执行块
         super.compile(buf);
-        go = new opc.Goto(this.line, this.column);
-        go.flag = opc.Goto.NEVER;
+        go = new opc.Break(this.line, this.column);
+        go.flag = opc.Break.NEVER;
         go.target = end;
         buf.push(go);
         //执行else if
@@ -624,8 +628,8 @@ export class Else extends NodeList {
     compile(buf: opc.Opcode[], start: opc.Opcode, end: opc.Opcode) {
         //执行块
         super.compile(buf);
-        let go = new opc.Goto(this.line, this.column);
-        go.flag = opc.Goto.NEVER;
+        let go = new opc.Break(this.line, this.column);
+        go.flag = opc.Break.NEVER;
         go.target = end;
         buf.push(go);
     }
@@ -637,8 +641,8 @@ export class Break extends Node {
     }
 
     compile(buf: opc.Opcode[], start: opc.Opcode, end: opc.Opcode) {
-        let go = new opc.Goto(this.line, this.column);
-        go.flag = opc.Goto.NEVER;
+        let go = new opc.Break(this.line, this.column);
+        go.flag = opc.Break.NEVER;
         go.target = this.goHead === true ? start : end;
         buf.push(go);
     }
@@ -709,25 +713,25 @@ export class For extends NodeList {
             call.parameters = 0;
             buf.push(call);
             //如果结束
-            let go = new opc.Goto(this.line, this.column);
+            let go = new opc.Break(this.line, this.column);
             go.flag = flag;
             go.target = target;
             buf.push(go);
         }
 
         if (this.elseBlock) {
-            hasNext(start, opc.Goto.TRUE);
+            hasNext(start, opc.Break.TRUE);
 
             //执行else块
             this.elseBlock.compile(buf, start, end)
 
-            let go = new opc.Goto(this.line, this.column);
-            go.flag = opc.Goto.NEVER;
+            let go = new opc.Break(this.line, this.column);
+            go.flag = opc.Break.NEVER;
             go.target = end;
             buf.push(go);
         }
         else {
-            hasNext(end, opc.Goto.FALSE);
+            hasNext(end, opc.Break.FALSE);
         }
 
         //开始标记
@@ -752,7 +756,7 @@ export class For extends NodeList {
 
         super.compile(buf, start, end); //需要传递开始与结束标签，上下文中 break,continue语句需要使用
 
-        hasNext(end, opc.Goto.FALSE);
+        hasNext(end, opc.Break.FALSE);
 
         // new Set(this.line, this.column, this.valueName,
         //     new Property(this.line, this.column,
@@ -772,7 +776,7 @@ export class For extends NodeList {
         buf.push(call);
 
         //回到开始
-        hasNext(start, opc.Goto.TRUE);
+        hasNext(start, opc.Break.TRUE);
         //结束
         buf.push(end);
         //TODO: 删除临时方法

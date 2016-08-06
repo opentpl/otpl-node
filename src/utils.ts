@@ -70,8 +70,8 @@ export class Encoding {
     }
 }
 
-encodings.set('utf8', new Encoding('utf8', 0x0000));
-encodings.set('ascii', new Encoding('ascii', 0x0001));
+encodings.set('utf8', new Encoding('utf8', 0x00));
+encodings.set('ascii', new Encoding('ascii', 0x01));
 
 /**
  * 获取一个字符串的MD5值
