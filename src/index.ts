@@ -78,7 +78,7 @@ export function config(rootDir: string, _env: Env) {
     return this
 }
 
-export function compile() {
+export function compile(viewName:string,deleteOnNotFoundView:boolean) {
     console.log(this)
 }
 

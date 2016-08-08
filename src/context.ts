@@ -382,7 +382,7 @@ export default class Context {
                 })
             })
         }
-        let target = path.join(this.env.targetDir, id + ".otc")
+        let target = path.join(this.env.targetDir, id + ".otil")
         Loader.open(target, this.env, (err, loader) => {
             if (err || this.env.debug) {
                 compile()

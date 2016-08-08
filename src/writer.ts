@@ -90,6 +90,12 @@ export default class Writer {
 	}
 
 	private writeNumber(num: number, bit: number, ty?: string) {
+
+		if(bit==8){
+			this.writeString(num+''); //解决nodejs不能存储64位数值的问题
+			return ;
+		}
+
         this.expand(bit)
 		if (!ty || ty === 'int') {
 			this.buf.writeIntBE(num, this.offset, bit, true)//后面突出多余位数

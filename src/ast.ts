@@ -499,7 +499,7 @@ export class BlockCall extends Node {
         this.id = (this.id + '').trim().toLowerCase();
         if (this.id !== 'body') {
             let sc = new opc.Scope(this.line, this.column);//创建块作用域
-            sc.unscoping = false;
+            sc.scoping = true;
             buf.push(sc);
         }
 
@@ -516,7 +516,7 @@ export class BlockCall extends Node {
 
         if (this.id !== 'body') {
             let sc = new opc.Scope(this.line, this.column);//销毁块作用域
-            sc.unscoping = true;
+            sc.scoping = false;
             buf.push(sc);
         }
 
@@ -694,7 +694,7 @@ export class For extends NodeList {
             new Property(this.line, this.column,
                 new Identifier(this.line, this.column, objName),
                 new NodeList([new String('next')]))).compile(buf);
-        //set set_fn=member('next')
+        //set set_fn=member('setVariables')
         new Set(this.line, this.column, setName,
             new Property(this.line, this.column,
                 new Identifier(this.line, this.column, objName),
@@ -756,7 +756,7 @@ export class For extends NodeList {
 
         super.compile(buf, start, end); //需要传递开始与结束标签，上下文中 break,continue语句需要使用
 
-        hasNext(end, opc.Break.FALSE);
+        //hasNext(end, opc.Break.FALSE);
 
         // new Set(this.line, this.column, this.valueName,
         //     new Property(this.line, this.column,

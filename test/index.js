@@ -1,21 +1,21 @@
 "use strict";
 const otpl = require("../lib/index");
 
-const env={
-    debug:true,
-    functions:{
-        test:()=>{
+const env = {
+    debug: true,
+    functions: {
+        test: () => {
             return "test fn!"
         }
     }
 }
 
 
-otpl.config(__dirname,env)
+otpl.config(__dirname, env)
 
 
-const data={
-    header:'Hello OTPL!',
+const data = {
+    header: 'Hello OTPL!',
     items: [
         {
             current: true,
@@ -34,7 +34,17 @@ const data={
             name: 'Foo3',
             url: 'http://example.com'
         }
-    ]
+    ],
+    item: {
+        name: 'Foo81',
+        "fn": function () {
+            return "call fun"
+        }
+    },
+    array: ["f002"],
+    "fn": function () {
+        return "call fun"
+    }
 }
 
 // var buf = new Buffer(5)
@@ -46,8 +56,8 @@ const data={
 
 function testDev() {
     console.log('test dev:')
-    otpl.render('develop',data,(err,result)=>{
-        if(err){
+    otpl.render('develop', data, (err, result) => {
+        if (err) {
             throw err
         }
         console.log(result)
@@ -56,8 +66,8 @@ function testDev() {
 
 function testCase() {
     console.log('test case:')
-    otpl.render('case',data,(err,result)=>{
-        if(err){
+    otpl.render('case', data, (err, result) => {
+        if (err) {
             throw err
         }
         console.log(result)
@@ -65,10 +75,10 @@ function testCase() {
 }
 
 let args = process.argv.splice(2);
-if(args.indexOf('--dev')>-1){
+if (args.indexOf('--dev') > -1) {
     testDev();
 }
-else{
+else {
     testCase();
 }
 console.log('test end')

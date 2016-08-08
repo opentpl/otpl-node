@@ -52,11 +52,16 @@ export default class Loader {
     readInt() {
         return this.read(4, "Failed to read integer.").readInt32BE(0);
     }
-    readLong() {
-        return this.read(8, "Failed to read long.").readIntBE(0, 8, true);//TODO:类型
+    readLong():number {
+        //解决nodejs不能存储64位数值的问题
+        return <number><any>this.readString();
+
+        //return this.read(8, "Failed to read long.").readIntBE(0, 8, true);//TODO:类型
     }
-    readFloat() {
-        return this.read(8, "Failed to read float.").readDoubleBE(0, true);//0-8
+    readFloat():number {
+        //解决nodejs不能存储64位数值的问题
+        return <number><any>this.readString();
+        //return this.read(8, "Failed to read float.").readDoubleBE(0, true);//0-8
     }
 
     readString(encoding?: utils.Encoding) {

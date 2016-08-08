@@ -541,7 +541,10 @@ export class Call extends Opcode {
 
         if (typeof method === 'string') {
             caller = context.GetFunc(method)
-            if (!caller || typeof caller != 'function') {
+            if (!caller) {
+                caller=context.getLocal(method);//从变量从获取
+            }
+            if(!caller || typeof caller != 'function'){
                 throw new Error('Function is undefined :' + method)
             }
             //内置函数不需要引用对象
@@ -771,24 +774,24 @@ export class Scope extends Opcode {
     constructor(line?: number, column?: number) {
         super(line, column)
     }
-    unscoping = false
+    scoping = false
     static get code() {
         return 0x0B
     }
 
     gen(out: Writer) {
         super.gen(out, Scope.code)
-        out.writeBool(this.unscoping)
+        out.writeBool(this.scoping)
     }
 
     load(loader: Loader): Opcode {
-        this.unscoping = loader.readBool()
+        this.scoping = loader.readBool()
         return this
     }
 
     exec(context: Context): number {
 
-        if (this.unscoping) {
+        if (!this.scoping) {
             context.unscope()
         }
         else {
@@ -899,28 +902,30 @@ export class Reference extends Opcode {
     }
 
     static get INCLUDE() {
-        return 1;
+        return 0x01;
     }
 
     static get REQUIRE() {
-        return 2;
+        return 0x02;
     }
 
     static get LAYOUT() {
-        return 3;
+        return 0x03;
     }
 
     gen(out: Writer) {
         super.gen(out, Reference.code)
         out.writeInt(this.line || 0)
-        out.writeString(this.src)
         out.writeByte(this.refType)
+        out.writeString(this.src)
+        
     }
 
     load(loader: Loader): Opcode {
         this.line = loader.readInt();
-        this.src = loader.readString()
         this.refType = loader.readByte()
+        this.src = loader.readString()
+        
         return this
     }
 

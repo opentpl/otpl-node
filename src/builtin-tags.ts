@@ -128,13 +128,15 @@ const TAGS = {
         tok = parser.skipWhitespace();
         tok = parser.expectType(lexer.TOKEN_ID, 'parseFor:', tok)
         let key = ''
-        let val = tok.value;
+        let val = tok.value
         tok = parser.skipWhitespace();
         if ((tok = parser.skipSymbol([',']))) {
+            tok = parser.skipWhitespace();
             tok = parser.expectType(lexer.TOKEN_ID, 'parseFor:', tok);
             key = val;
             val = tok.value;
         }
+        tok = parser.skipWhitespace();
         tok = parser.expectValue(':', 'parseFor:', tok)
 
         let it = parser.parseExpression();//迭代表达式
