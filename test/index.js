@@ -78,6 +78,14 @@ let args = process.argv.splice(2);
 if (args.indexOf('--dev') > -1) {
     testDev();
 }
+else if (args.indexOf('--c') > -1) {
+    otpl.compile('/develop.otpl.html', (err, result) => {
+        if (err) {
+            throw err
+        }
+        console.log(result)
+    })
+}
 else {
     testCase();
 }

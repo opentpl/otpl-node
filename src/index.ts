@@ -48,7 +48,7 @@ export function config(rootDir: string, _env: Env) {
 
     env.debug = env.debug === true ? true : false
     env.strictMode = env.strictMode === true ? true : false
-    env.extensions = env.extensions || ['.otpl.html', '.otpl.json', '.otpl', '.json']
+    env.extensions = env.extensions || ['.otpl.html', '.otpl.json', '.html','.otpl', '.json']
     env.soruceDir = env.soruceDir || './views'
     env.targetDir = env.targetDir || './.otpl'
     env.functions = env.functions || {}
@@ -78,8 +78,14 @@ export function config(rootDir: string, _env: Env) {
     return this
 }
 
-export function compile(viewName:string,deleteOnNotFoundView:boolean) {
-    console.log(this)
+/**
+ * 编译文件
+ */
+export function compile(viewName:string, callback: Function) {
+    let ctx = new Context(env, compiler, interpreter, {})
+    ctx.compile(viewName,'',(err,target)=>{
+        callback(err,target)
+    });
 }
 
 /**

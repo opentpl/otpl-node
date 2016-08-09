@@ -200,66 +200,30 @@ export default class Context {
         }
     }
 
-    // resolve(file: string, base: string, callback: (err: NodeJS.ErrnoException, result: any, stats: fs.Stats) => void) {
-    //     let me = this
-    //     let urls = function* () {
+    /**
+     * 编译一个视图 TODO:需要实现未更改不编译
+     */
+    compile(viewName: string, ref: string, callback: (err: NodeJS.ErrnoException, target: string) => void) {
+        let normal = this.normalize(viewName, ref, this.env.extensions)
+        //console.log(normal)
+        let id = utils.md5(normal.name)
+        let target = path.join(this.env.targetDir, id + ".otil")
+        this.resolve(normal.name, normal.ext, (err, src, stats) => {
+            if (err) {
+                return callback(err, target)
+            }
+            this.compiler.compile(src, stats, target, (err, target) => {
+                if (err) {
+                    return callback(err, target)
+                }
+                callback(null,target)
+            })
+        })
+    }
 
-    //         let fixed = false
-    //         if (file.startsWith("~")) {
-    //             fixed = true
-    //             file = path.normalize(file.substr(1))
-    //         }
-
-    //         //let exts = ["otpl", "otpl.html", "html"]
-    //         //let root = me.env.soruceDir
-
-    //         if (!fixed) {
-    //             let ext = me.exist(file, me.env.extensions)
-    //             if (ext) {
-    //                 file = path.normalize(path.join(file))
-    //                 yield { file: file.substr(0, file.length - ext.length - 1), ext: ext, root: me.env.soruceDir }
-    //             }
-    //             else {
-    //                 for (let ext of me.env.extensions) {
-    //                     yield { file: path.normalize(path.join(file)), ext: ext, root: me.env.soruceDir }
-    //                 }
-    //             }
-    //         }
-    //         else {
-    //             for (let ext of me.env.extensions) {
-    //                 if (file.endsWith(ext)) {
-    //                     yield { file: file, ext: ext, root: "" }
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     let itor = urls()
-    //     let next: Function
-    //     next = () => {
-    //         let stat = itor.next()
-    //         if (!stat.done) {
-    //             fs.stat(path.join(stat.value.root, stat.value.file + stat.value.ext), (err, stats) => {
-    //                 if (err) {
-    //                     // console.log(stat.value)
-    //                     // console.log(err)
-    //                     next()
-    //                     return
-    //                 }
-    //                 else if (!stats.isFile()) {
-    //                     next()
-    //                     return
-    //                 }
-    //                 callback(null, stat.value, stats)
-    //             })
-    //         }
-    //         else {
-    //             callback(new Error("not match:" + file), null, null)
-    //         }
-    //     }
-    //     next()
-    // }
-
+    /**
+     * 执行
+     */
     exec(file: string, callback: (err: NodeJS.ErrnoException, rendered: string) => void) {
 
         this.load(file, "", (err, loader) => {
@@ -276,45 +240,9 @@ export default class Context {
 
     }
 
-    // load2(file: string, ref: string, callback: (err: NodeJS.ErrnoException, loader: Loader) => any) {
-
-    //     this.resolve(file, ref, (err, src, stats) => {
-    //         if (err) {
-    //             callback(err, null)
-    //         }
-    //         else {
-    //             let id = utils.md5(src.file)
-    //             let loader = this.loaders.get(id)
-    //             if (loader && !this.env.debug) {
-    //                 return callback(null, loader)
-    //             }
-
-    //             let target = path.join(this.env.targetDir, id + ".otc")
-    //             Loader.open(target, this.env, (err, loader) => {
-    //                 if (err || this.env.debug) {
-    //                     this.compiler.compile(src, stats, target, (err, target) => {
-    //                         if (err) {
-    //                             return callback(err, null)
-    //                         }
-    //                         Loader.open(target, this.env, (err, loader) => {
-    //                             if (err) {
-    //                                 return callback(err, null)
-    //                             }
-    //                             this.loaders.set(id, loader)
-    //                             callback(err, loader)
-    //                         })
-    //                     })
-    //                 }
-    //                 else {
-    //                     this.loaders.set(id, loader)
-    //                     callback(err, loader)
-    //                 }
-    //             })
-    //         }
-    //     })
-
-    // }
-
+    /**
+     * 发现原文件
+     */
     resolve(file: string, ext: string, callback: (err: NodeJS.ErrnoException, result: { file: string, ext: string, root: string }, stats: fs.Stats) => void) {
         let me = this
         let urls = function* () {
@@ -348,12 +276,15 @@ export default class Context {
                 })
             }
             else {
-                callback(new Error("not match:" + file), null, null)
+                callback(new Error("未找到视图:" + file+" 源目录:"+me.env.soruceDir), null, null)
             }
         }
         next()
     }
 
+    /**
+     * 根据路径载入
+     */
     load(name: string, ref: string, callback: (err: NodeJS.ErrnoException, loader: Loader) => void) {
         let normal = this.normalize(name, ref, this.env.extensions)
 
@@ -400,12 +331,19 @@ export default class Context {
 
     }
 
+    /**
+     * 规范路径
+     */
     normalize(name: string, ref: string, exts: string[]) {
         let ext = this.exist(name, exts)
         name = path.normalize(path.join("", name)).replace('\\', '/')
-        let result = { name: ext ? name.substr(0, name.length - ext.length - 1) : name, ext: ext }
+
+        let result = { name: ext ? name.substr(0, name.length - ext.length) : name, ext: ext }
         if (!result.name.startsWith('/')) {
             result.name = '/' + result.name
+        }
+        if (result.name.endsWith('.') || result.name.endsWith('/')) {
+            result.name = result.name.substr(0,result.name.length-1)
         }
         return result
     }
