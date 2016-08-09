@@ -32,19 +32,21 @@ const app = require('koa')();
 
 //注册中间件
 app.use(function *(next){
-	if(!this.otpl){
-		var ctx = this;
-		this.otpl = (filename,data,callback) => {
-			callback = callback || function(err,rendered){
-				if(err){
-					ctx.body = err.message;
-					return;
-				}
-				ctx.body = rendered;
-			};
-			otpl.render(filename,data,callback);
-		};
-	}
+	this.otpl = function* (view, data) {
+        let ctx = this
+        yield new Promise((resolve, reject) => {
+            let callback = function (err, rendered) {
+                if (err) {
+                    rendered = err.message;
+                    console.log('render error:', err)
+                }
+				this.type = 'text/html;charset=UTF-8'
+                ctx.body = rendered
+                resolve(rendered)
+            }
+            otpl.render(view, data, callback)
+        })
+    }
 	yield next;
 });
 

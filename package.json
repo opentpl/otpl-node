@@ -1,5 +1,5 @@
 {
-  "name": "otpl",
+  "name": "opentpl",
   "version": "0.3.2",
   "description": "OTPL for Nodejs",
   "main": "lib/index.js",
@@ -9,21 +9,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/diosay/otpl-node.git"
+    "url": "git+https://github.com/opentpl/otpl-node.git"
   },
   "keywords": [
     "otpl",
     "otpl-node",
+    "opentpl",
     "template",
     "node",
     "template",
     "javascript",
     "render"
   ],
-  "author": "diosay",
+  "author": "Jun Hwong",
   "license": "LGPL-3.0",
   "bugs": {
-    "url": "https://github.com/diosay/otpl-node/issues"
+    "url": "https://github.com/opentpl/otpl-node/issues"
   },
-  "homepage": "https://github.com/diosay/otpl-node#readme"
+  "homepage": "https://github.com/opentpl/otpl-node#readme"
 }
