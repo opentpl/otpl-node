@@ -20,7 +20,7 @@ $ npm install --save otpl
 
 ## 用例
 ```js
-const otpl = require('otpl')
+const otpl = require('opentpl')
 
 otpl.config(__dirname,{
     debug:true,
