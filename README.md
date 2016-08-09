@@ -15,7 +15,7 @@ OTPL for Nodejs (Typescript).
 ## 安装
 
 ```bash
-$ npm install --save otpl
+$ npm install opentpl --save
 ```
 
 ## 用例
