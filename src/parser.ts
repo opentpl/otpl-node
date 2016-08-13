@@ -87,6 +87,7 @@ export class Parser {
      * 跳过指定符号的标记
      */
     skipSymbol(symols: string[]) {
+        this.skipWhitespace()
         if (this.peek && this.peek.type === lexer.TOKEN_SYMBOL) {
             if (symols.indexOf(this.peek.value) > -1) {
                 return this.next;
@@ -109,6 +110,7 @@ export class Parser {
     }
 
     expectValue(value: string, prefix?: string, tag?: lexer.Token) {
+        this.skipWhitespace()
         var tok = this.peek;
         if (!tok || tok.value !== value) {
             tok = (tok || tag) || { type: '', value: 'null', line: -1, column: -1 };
@@ -118,6 +120,7 @@ export class Parser {
     }
 
     expectType(type: string, prefix?: string, tag?: lexer.Token) {
+        this.skipWhitespace()
         var tok = this.peek;
         if (!tok || tok.type !== type) {
             tok = (tok || tag) || { value: '', type: 'null', line: -1, column: -1 };
