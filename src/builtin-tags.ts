@@ -79,12 +79,19 @@ const TAGS = {
 
     'if': (tok: lexer.Token, parser: Parser) => {
         tok = parser.skipWhitespace();
-        tok = parser.expectValue('(', 'parseIf: ', tok)
+        // tok = parser.expectValue('(', 'parseIf: ', tok)
 
+        // let condition: ast.Node;
+        // if (parser.skipValue('(')) {
+        //     condition = parser.parseExpression();
 
+        //     tok = parser.expectValue(')', 'parseIf: ', tok)
+        // }
+        // else {
+        //     condition = parser.parseExpression();
+        // }
         let condition = parser.parseExpression();
-        //console.log(node.cond.children[0]);
-        tok = parser.expectValue(')', 'parseIf: ', tok)
+
         parser.checkBoundary(tok, 'parseIf:');
         var node = new ast.If(tok.line, tok.column, condition);
         parser.parseUntil(node, [mbk(['elif'], true), mbk(['else'], true), mbk(['/', 'if'])]);

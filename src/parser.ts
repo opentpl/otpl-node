@@ -96,6 +96,18 @@ export class Parser {
         return null;
     }
 
+    /**
+     * 跳过指定的值
+     */
+    skipValue(value: string) {
+        this.skipWhitespace()
+        var tok = this.peek
+        if (!tok || tok.value !== value) {
+            return null //
+        }
+        return this.next
+    }
+
     expectValue(value: string, prefix?: string, tag?: lexer.Token) {
         var tok = this.peek;
         if (!tok || tok.value !== value) {
@@ -142,7 +154,7 @@ export class Parser {
      */
     checkBoundary(node: { line: number, column: number }, msg: string) {
         if (!this.parseBoundary()) {
-            this.fail(name + ': 未结束的标签.', node.line, node.column);
+            this.fail(msg + ': 未结束的标签.', node.line, node.column);
         }
     }
 
@@ -215,7 +227,7 @@ export class Parser {
     parseTernary() {
         let tok: lexer.Token;
         let node = this.parseLogic();
-
+        
         while ((tok = this.skipSymbol(['?']))) {
             let line = tok.line, col = tok.column;
             let left = this.parseExpression();
@@ -369,6 +381,9 @@ export class Parser {
             this.inCode = false;
             return null;
         }
+        else if (tok.type === lexer.TOKEN_SYMBOL && tok.value==='(') {
+            node = this.parseGroup(')');
+        }
 
         if (!node) {
             this.fail('unexpected token: ' + tok.value,
@@ -386,8 +401,22 @@ export class Parser {
      * 解析一个表达式
      */
     parseExpression(): ast.Node {
-        var node = this.parseTernary();
-        return node;
+        return this.parseTernary();
+        // let node: ast.Node;
+        // this.skipWhitespace();
+        // if (this.skipSymbol(['('])) {
+        //     let list = this.parseGroup(')');
+        //     if (list.count == 1) {
+        //         node = list.childen[0]
+        //     }
+        //     else {
+        //         node = list
+        //     }
+        // }
+        // else {
+        //     node = this.parseTernary();
+        // }
+        // return node;
     }
 
     /**
@@ -537,20 +566,25 @@ export class Parser {
         }
         else {
             //TODO: extends
-
-            let primary = this.parseExpression(); //TODO: 单独拿出来解析 
-            let filters: ast.Filter[] = [];
-
-            this.skipWhitespace();
-            while (this.skipSymbol(['|'])) {
-                filters.push(this.parseFilter());
-                this.skipWhitespace();
-            }
-            node = new ast.Print(tok.line, tok.column, primary, raw, filters);
-
-            this.checkBoundary(node, 'parseStatement->print');
+            node=this.parsePrint(tok,raw)
         }
 
+        return node;
+    }
+
+    parsePrint(tok: lexer.Token, raw: boolean) {
+        let node: ast.Node;
+        let primary = this.parseExpression(); //TODO: 单独拿出来解析 
+        let filters: ast.Filter[] = [];
+        
+        this.skipWhitespace();
+        while (this.skipSymbol(['|'])) {
+            filters.push(this.parseFilter());
+            this.skipWhitespace();
+        }
+        node = new ast.Print(tok.line, tok.column, primary, raw, filters);
+
+        this.checkBoundary(node, 'parsePrint');
         return node;
     }
 

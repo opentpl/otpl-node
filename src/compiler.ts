@@ -73,7 +73,13 @@ export class Compiler {
             let tpl = data.toString().replace(/^\uFEFF/, '')
             let buf: ops.Opcode[] = []
             let ptr = 1
-            parser.parse(tpl, { file: src.file + src.ext, mtime: srcStats.mtime.getTime() }).compile(buf)
+            try{
+                parser.parse(tpl, { file: src.file + src.ext, mtime: srcStats.mtime.getTime() }).compile(buf)
+            }
+            catch(e){
+                return callback(e,target)
+            }
+            
 
             for (let op of buf) {
                 op.updatePtr(ptr++)

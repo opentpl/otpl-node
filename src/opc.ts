@@ -419,7 +419,7 @@ export class LoadConst extends Opcode {
                 this.value = false
                 break
             case DataType.TRUE:
-                this.value = false
+                this.value = true
                 break
             case DataType.NULL:
                 this.value = null
