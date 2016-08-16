@@ -15,7 +15,13 @@ interface Options {
  * 表示一个断点
  */
 interface Break {
+    /**
+     * 保留这个断点，以待下次解析
+     */
     keep: boolean
+    /**
+     * 断点所包含的标记组合
+     */
     tags: string[]
 }
 
@@ -65,12 +71,18 @@ export class Parser {
     /**
      * 跳过空白
      */
-    skipWhitespace() {
-        let tok = this.peek;
-        while (this.peek && this.peek.type === lexer.TOKEN_WHITESPACE) {
-            tok = this.next;
-        }
-        return tok;
+    skipWhitespace(ref?:lexer.Token) {
+        do{
+            let tok = this.peek
+            if(tok && tok.type === lexer.TOKEN_WHITESPACE){
+                tok=this.next
+            }
+            else{
+                return tok || ref
+            }
+
+        }while(true)
+        
     }
 
     /**
@@ -160,69 +172,67 @@ export class Parser {
             this.fail(msg + ': 未结束的标签.', node.line, node.column);
         }
     }
+    
+    /**
+     * 当次已检查的断点
+     */
+    checkedBreak:Break
 
     /**
      * 判断结构断点
      */
     isBreak(breaks: Break[]) {
+        
+        this.checkedBreak=null
+
         if (!this.inCode) {
-            return false;
+            return false
         }
         else if (!breaks || breaks.length < 1) {
-            return false;
+            return false
         }
 
-        let tok: lexer.Token;
-        let found = false;
+        let tok: lexer.Token
+        let found = false
         for (let item of breaks) {
             if (!item || !item.tags || item.tags.length < 1) {
-                continue;
+                continue
             }
-            let stack: lexer.Token[] = [];
-            found = true;
+            let stack: lexer.Token[] = [] //保留检查断点的栈
+            found = true
+            //完整验证一个断点
             for (let tag of item.tags) {
                 if (this.peek && this.peek.value === tag) {
-                    stack.push(this.next);
+                    stack.push(this.next)
                 }
                 else {
-                    found = false;
-                    break;
+                    found = false
+                    break
                 }
             }
 
+            //如果断点不成立或这个断点需要保留，则加入到待查表
             if (!found || item.keep) {
                 for (let i = stack.length - 1; i >= 0; i--) {
                     if (stack[i]) {
-                        this._peeked.unshift(stack[i]);
+                        this._peeked.unshift(stack[i])
                     }
                 }
             }
 
             if (found) {
-                return true;
+                this.checkedBreak=item
+
+                // if(!item.keep){
+                //     this.parseBoundary() //确认标签的闭合
+                //     console.log(this.peek) //TODO:
+                // }
+
+                return true
             }
         }
-        return false;
+        return false
     }
-
-    // parseOr(){
-    //     let tok:lexer.Token;
-    // 	let node = this.parseAnd();
-    // 	while((tok=this.skipSymbol('||'))){
-    // 		node = new ast.Binary(tok.line,tok.column,
-    // 			node,this.parseAnd(),'or');
-    // 	}
-    // 	return node;
-    // }
-    // parseAnd(){
-    //     let tok:lexer.Token;
-    // 	let node = this.parseCompare();
-    // 	while((tok=this.skipSymbol('&&'))){
-    // 		node = new ast.Binary(tok.line,tok.column,
-    // 			node,this.parseCompare(),'and');
-    // 	}
-    // 	return node;
-    // }
 
     /**
      * 解析三目运算

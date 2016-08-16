@@ -79,26 +79,20 @@ const TAGS = {
 
     'if': (tok: lexer.Token, parser: Parser) => {
         tok = parser.skipWhitespace();
-        // tok = parser.expectValue('(', 'parseIf: ', tok)
-
-        // let condition: ast.Node;
-        // if (parser.skipValue('(')) {
-        //     condition = parser.parseExpression();
-
-        //     tok = parser.expectValue(')', 'parseIf: ', tok)
-        // }
-        // else {
-        //     condition = parser.parseExpression();
-        // }
         let condition = parser.parseExpression();
 
-        parser.checkBoundary(tok, 'parseIf:');
+        parser.checkBoundary(tok, 'parseIf');
         var node = new ast.If(tok.line, tok.column, condition);
-        parser.parseUntil(node, [mbk(['elif'], true), mbk(['else'], true), mbk(['/', 'if'])]);
+        parser.parseUntil(node, [mbk(['elif'], true), mbk(['else'], true), mbk(['/', 'if'], true)]);
+        // let cb=parser.checkedBreak
+        // if(cb && cb.tags && cb.tags.length>=2 && cb.tags[1]=='if'){
+        //     return node
+        // }
 
         switch (parser.peek ? parser.peek.value : '') {
             case 'elif': {
                 node.items.push(TAGS['if'](parser.next, parser));
+                return node
             }
             case 'else': {
                 node.items.push(TAGS['_else'](parser.next, parser, 'if'));
@@ -108,28 +102,23 @@ const TAGS = {
                 break;
         }
 
+        tok = parser.skipWhitespace(tok)
+        if (parser.skipSymbol(['/']) && parser.skipValue('if')) {
+
+            parser.checkBoundary(tok, 'parseIf');
+        }
+        else {
+            parser.fail('parseIf:未找到end if', tok.line, tok.column)
+        }
 
         return node;
     },
-    // '_elif': (tok: lexer.Token, parser: Parser) => {
-    //     tok = parser.skipWhitespace();
-    //     tok = parser.expectValue('(', 'parseElif: ', tok)
-
-
-    //     let condition = parser.parseExpression();
-    //     //console.log(node.cond.children[0]);
-    //     tok = parser.expectValue(')', 'parseElif: ', tok)
-    //     parser.checkBoundary(tok, 'parseElif:');
-    //     var node = new ast.Elif(tok.line, tok.column, condition);
-    //     parser.parseUntil(node, [mbk(['elif'], true), mbk(['else'], true), mbk(['/', 'if'])]);
-    //     return node;
-    // },
     '_else': (tok: lexer.Token, parser: Parser, tag: string) => {
-        tok = parser.skipWhitespace();
-        parser.checkBoundary(tok, 'parseElse:');
-        var node = new ast.Else(tok.line, tok.column);
-        parser.parseUntil(node, [mbk(['/', tag])]);
-        return node;
+        tok = parser.skipWhitespace(tok)
+        parser.checkBoundary(tok, 'parseElse')
+        var node = new ast.Else(tok.line, tok.column)
+        parser.parseUntil(node, [mbk(['/', tag], true)])
+        return node
     },
     'for': (tok: lexer.Token, parser: Parser) => {
         tok = parser.skipWhitespace();
@@ -149,9 +138,18 @@ const TAGS = {
         let it = parser.parseExpression();//迭代表达式
         parser.checkBoundary(tok, 'parseElse:');
         let node = new ast.For(tok.line, tok.column, key, val, it);
-        parser.parseUntil(node, [mbk(['else'], true), mbk(['/', 'for'])]);
+        parser.parseUntil(node, [mbk(['else'], true), mbk(['/', 'for'], true)]);
         if (parser.peek && parser.peek.value === 'else') {
             node.elseBlock = TAGS['_else'](parser.next, parser, 'for');
+        }
+
+
+        tok = parser.skipWhitespace(tok)
+        if (parser.skipSymbol(['/']) && parser.skipValue('for')) {
+            parser.checkBoundary(tok, 'parseFor');
+        }
+        else {
+            parser.fail('parseFor:未找到end for', tok.line, tok.column)
         }
         return node;
     },
