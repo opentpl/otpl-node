@@ -866,11 +866,11 @@ export class BlockCall extends Opcode {
                 if (err) {
                     return callback(err, -1)
                 }
-
+                callback(err, this.ptr + 1)
                 // //TODO: 为什么需要这样才能渲染后面部分？
-                context.interpreter.exec(this.loader, context, this.ptr + 1, (err) => {
-                    callback(err, this.ptr + 1)
-                })
+                // context.interpreter.exec(this.loader, context, this.ptr + 1, (err) => {
+                //     callback(err, this.ptr + 1)
+                // })
             })
         }
         else {

@@ -164,10 +164,10 @@ export default class Loader {
         this.bodyLoader = loader;
         this.bodyPtr = ptr;
 
-        for (var id in loader.blocks) {
-            this.blocks.set(id, loader.blocks.get(id));
+        for (let id in this.blocks) {
+            loader.blocks.set(id, this.blocks.get(id));
         }
-        loader.blocks = this.blocks;
+        this.blocks = loader.blocks;
 
     }
 

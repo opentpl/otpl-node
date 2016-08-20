@@ -327,7 +327,7 @@ export class Tokenizer {
             else if (c === '"' || c === '\'') {
                 //处理字符串
                 val = this.parseString(c);
-                if (!val) {
+                if (val===undefined || val===null) {
                     this.fail('字符串未结束', line, col);
                 }
                 return token(TOKEN_STRING, val, line, col);
