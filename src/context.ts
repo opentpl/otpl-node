@@ -331,12 +331,27 @@ export default class Context {
 
     }
 
+    flatPath(path:string){
+        while(path.indexOf('\\')>-1){
+            path=path.replace('\\', '/')
+        }
+        return path
+    }
+
     /**
      * 规范路径
      */
     normalize(name: string, ref: string, exts: string[]) {
+
+        ref = this.flatPath(path.normalize(ref||'/'))
+        // console.log(ref)
+        if(ref.startsWith('/')){
+            //TODO: 跟踪其它引用路径是否包含文件名的bug
+            ref='/'
+        }
+
         let ext = this.exist(name, exts)
-        name = path.normalize(path.join("", name)).replace('\\', '/')
+        name = this.flatPath(path.normalize(path.join(ref, name)))
 
         let result = { name: ext ? name.substr(0, name.length - ext.length) : name, ext: ext }
         if (!result.name.startsWith('/')) {
