@@ -36,5 +36,7 @@ node_modules
 dst
 lib
 test/data/.c
-test/.otpl
-test/view/develop.otpl.html
+test/.otpl/
+#test/views/develop.otpl.html
+
+# git update-index --assume-unchanged develop.otpl.html
