@@ -37,6 +37,6 @@ dst
 lib
 test/data/.c
 test/.otpl/
-#test/views/develop.otpl.html
+test/views/develop.otpl.html
 
 # git update-index --assume-unchanged develop.otpl.html
