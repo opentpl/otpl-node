@@ -71,6 +71,9 @@ export default class Writer {
 	writeShort(val: number) {
 		this.writeNumber(val, 2)
 	}
+	writePtr(val: number) {
+		this.writeNumber(val, 2)
+	}
 	writeInt(val: number) {
 		this.writeNumber(val, 4)
 	}

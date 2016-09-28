@@ -39,10 +39,10 @@ export default class Loader {
     }
 
     /**
-     * 读取协议行头 5 字节
+     * 读取协议行头 6 字节
      */
     readHead() {
-        return this.read(5);
+        return this.read(6);
     }
 
     readByte() {
@@ -52,6 +52,11 @@ export default class Loader {
     readInt() {
         return this.read(4, "Failed to read integer.").readInt32BE(0);
     }
+
+    readPtr() {
+        return this.read(2, "Failed to read ptr.").readUInt16BE(0);
+    }
+
     readLong():number {
         //解决nodejs不能存储64位数值的问题
         return <number><any>this.readString();
@@ -83,14 +88,15 @@ export default class Loader {
     }
 
     private loadHeader() {
-        let buf =  this.read(8)
-        let productName = buf.toString(utils.Encoding.ASCII.name, 0, 4)    //otpl-il
-        this.version = buf.readUInt8(4) 		                           //02
-        this.encoding = utils.Encoding.valueOf(buf.readUInt8(5))           //UTF8
-        //2位保留
+        let buf =  this.read(12)
+        let productName = buf.toString(utils.Encoding.ASCII.name, 0, 4)    //OTIL
+        this.version = buf.readUInt16BE(4) 		                           //02
+        this.encoding = utils.Encoding.valueOf(buf.readUInt8(6))           //UTF8
+        //3位保留
+        this.endHeaderPtr = buf.readUInt16BE(10)                           //获取头结束地址
         this.mtime = this.readLong()                                       //获取生成时间
         this.src = this.readString(utils.Encoding.UTF8)                    //路径统一为utf8
-        this.endHeaderPtr = this.readInt()                                 //获取头结束地址
+        
     }
 
 
