@@ -96,6 +96,7 @@ export default class Context {
         if (name == 'viewdata') {
             return this.data;
         }
+        //TODO: 在严格模式下未设置变量应该报错
         return this.current.get(name);
     }
 

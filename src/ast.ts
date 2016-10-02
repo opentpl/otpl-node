@@ -123,6 +123,7 @@ export class Identifier extends Node {
  */
 export class Root extends NodeList {
     private blocks = new NodeList()
+    private requires = new NodeList()
     private layout: Layout
     constructor(private file: string, private mtime: number) {
         super()
@@ -132,6 +133,9 @@ export class Root extends NodeList {
         if (node instanceof Block) {
             this.blocks.append(node);
         }
+        // else if (node instanceof Require) {
+        //     this.requires.append(node);
+        // }
         else if (node instanceof Layout) {
             if (this.layout) {
                 throw "layout 只能出现一次";
@@ -148,8 +152,9 @@ export class Root extends NodeList {
         op.endHeader = new opc.Nop(this.line, this.column);
         op.filename = this.file;
         op.mtime = this.mtime;
-
         buf.push(op);
+        //write requires
+        this.requires.compile(buf);
         //write blocks
         this.blocks.compile(buf);
         //write header end

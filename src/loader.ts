@@ -57,6 +57,10 @@ export default class Loader {
         return this.read(2, "Failed to read ptr.").readUInt16BE(0);
     }
 
+    readUShort() {
+        return this.read(2, "Failed to read ptr.").readUInt16BE(0);
+    }
+
     readLong():number {
         //解决nodejs不能存储64位数值的问题
         return <number><any>this.readString();
@@ -72,7 +76,7 @@ export default class Loader {
     readString(encoding?: utils.Encoding) {
         encoding = encoding || this.encoding;
 
-        var length = this.readInt();
+        var length = this.readUShort();
         if (length > 0) {
             return this.read(length, 'Failed to read string, count ' + length).toString(encoding.name, 0, length);
         }

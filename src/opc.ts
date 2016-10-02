@@ -216,9 +216,9 @@ export function load(loader: Loader, buf: Buffer): Opcode {
             let op = <Opcode>(new clazz())
             op.loader = loader
             op.updatePtr(ptr)
-            
-            op.line=line
-            op.flag=flag
+
+            op.line = line
+            op.flag = flag
 
             return op.load(loader)
         }
@@ -289,7 +289,7 @@ export class Jump extends Opcode {
     constructor(line?: number, column?: number) {
         super(line, column)
     }
-    
+
     target: Opcode
     private targetPtr: number
     static get code() {
@@ -319,7 +319,7 @@ export class Jump extends Opcode {
 
     gen(out: Writer) {
         super.gen(out, Jump.code)
-        
+
         if (this.flag != Jump.EXIT) {
             out.writePtr(this.target.ptr)
         }
@@ -370,15 +370,15 @@ export class LoadConst extends Opcode {
         super(line, column)
     }
     value: any
-    
+
     static get code(): number {
         return 0x04
     }
-    get datatype(){
+    get datatype() {
         return this.flag
     }
-    set datatype(v:number){
-        this.flag=v
+    set datatype(v: number) {
+        this.flag = v
     }
 
     gen(out: Writer) {
@@ -407,7 +407,7 @@ export class LoadConst extends Opcode {
     }
 
     load(loader: Loader): Opcode {
-        
+
         switch (this.datatype) {
             case DataType.FALSE:
                 this.value = false
@@ -509,16 +509,16 @@ export class Call extends Opcode {
     constructor(line?: number, column?: number) {
         super(line, column)
     }
-    
+
     static get code(): number {
         return 0x07
     }
 
-    get parameters(){
+    get parameters() {
         return this.flag
     }
-    set parameters(v:number){
-        this.flag=v
+    set parameters(v: number) {
+        this.flag = v
     }
 
     gen(out: Writer) {
@@ -580,11 +580,11 @@ export class Print extends Opcode {
         return 0x08
     }
 
-    get escape(){
-        return this.flag?false:true
+    get escape() {
+        return this.flag==0x00 ? false : true
     }
-    set escape(v:boolean){
-        this.flag=v?0x00:0x01
+    set escape(v: boolean) {
+        this.flag = v ? 0x01 : 0x00
     }
 
     gen(out: Writer) {
@@ -613,10 +613,10 @@ export class Operation extends Opcode {
     /**
      * 运算符
      */
-    get operator(){
+    get operator() {
         return this.flag
     }
-    set operator(v:Operator){
+    set operator(v: Operator) {
         this.flag
     }
 
@@ -723,11 +723,11 @@ export class LoadMember extends Opcode {
         return 0x0A
     }
 
-    get parameters(){
+    get parameters() {
         return this.flag
     }
-    set parameters(v:number){
-        this.flag=v
+    set parameters(v: number) {
+        this.flag = v
     }
 
     gen(out: Writer) {
@@ -776,16 +776,16 @@ export class Scope extends Opcode {
     constructor(line?: number, column?: number) {
         super(line, column)
     }
-    
+
     static get code() {
         return 0x0B
     }
 
-    get scoping(){
-        return this.flag?false:true
+    get scoping() {
+        return this.flag==0x00 ? false : true
     }
-    set scoping(v:boolean){
-        this.flag=v?0x00:0x01
+    set scoping(v: boolean) {
+        this.flag = v ? 0x01 : 0x00
     }
 
     gen(out: Writer) {
@@ -850,11 +850,11 @@ export class BlockCall extends Opcode {
         return 0x0D
     }
 
-    get parameters(){
+    get parameters() {
         return this.flag
     }
-    set parameters(v:number){
-        this.flag=v
+    set parameters(v: number) {
+        this.flag = v
     }
 
     gen(out: Writer) {
@@ -903,7 +903,7 @@ export class Reference extends Opcode {
         super(line, column)
     }
     src: string
-    
+
     static get code() {
         return 0x0E
     }
@@ -920,11 +920,11 @@ export class Reference extends Opcode {
         return 0x03;
     }
 
-    get refType(){
+    get refType() {
         return this.flag
     }
-    set refType(v:number){
-        this.flag=v
+    set refType(v: number) {
+        this.flag = v
     }
 
     gen(out: Writer) {

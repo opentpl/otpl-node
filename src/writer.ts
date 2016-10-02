@@ -126,7 +126,7 @@ export default class Writer {
 	 */
 	writeString(val: string, encoding?: string) {
 		let buf = new Buffer(val, encoding || this.encoding.name)
-		this.writeInt(buf.length)
+		this.writeShort(buf.length)
 		this.writeBytes(buf,0,buf.length)
 	}
 	
