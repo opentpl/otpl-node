@@ -579,13 +579,13 @@ export class If extends NodeList {
 
     compile(buf: opc.Opcode[]) {
 
-        let start = new opc.Nop(this.line, this.column);
+        let next = new opc.Nop(this.line, this.column);
         let end = new opc.Nop(this.line, this.column);
         //计算条件
         this.condition.compile(buf);
         let go = new opc.Jump(this.line, this.column);
         go.flag = opc.Jump.FALSE;
-        go.target = start;
+        go.target = next;
         buf.push(go);
         //执行块
         super.compile(buf);
@@ -594,11 +594,11 @@ export class If extends NodeList {
         go.target = end;
         buf.push(go);
         //执行else if
-        buf.push(start);
+        buf.push(next);
         for (let node of this.items) {
-            start = new opc.Nop(this.line, this.column);
-            node.compile(buf, start, end);
-            buf.push(start);
+            next = new opc.Nop(this.line, this.column);
+            node.compile(buf, next, end);
+            buf.push(next);
         }
         buf.push(end);
 
