@@ -617,7 +617,7 @@ export class Operation extends Opcode {
         return this.flag
     }
     set operator(v: Operator) {
-        this.flag
+        this.flag=v
     }
 
     gen(out: Writer) {
