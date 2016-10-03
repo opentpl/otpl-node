@@ -449,7 +449,9 @@ export class Property extends Node {
         this.body.compile(buf);
         var lm = new opc.LoadMember(this.line, this.column);
         lm.parameters = this.parameters.count;
+        lm.getMethod=this.getMethod
         buf.push(lm);
+        
     }
 }
 

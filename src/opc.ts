@@ -722,6 +722,7 @@ export class LoadMember extends Opcode {
     static get code() {
         return 0x0A
     }
+    getMethod: boolean
 
     get parameters() {
         return this.flag
@@ -732,9 +733,11 @@ export class LoadMember extends Opcode {
 
     gen(out: Writer) {
         super.gen(out, LoadMember.code)
+        out.writeBool(this.getMethod)
     }
 
     load(loader: Loader): Opcode {
+        this.getMethod=loader.readBool()
         return this
     }
 
@@ -747,12 +750,17 @@ export class LoadMember extends Opcode {
         }
         args.reverse()
 
-        if (!obj || this.parameters <= 0) {
+        if (!obj || this.parameters == 0) {
             context.push(null)//TODO:根据模式报错
             return this.ptr + 1
         }
+        // TODO: 未完成
+        if(this.getMethod){
+            context.push(obj)
+        }
 
         if (this.parameters > 1) {
+            //TODO:索引器
             let caller = obj['get']
             if (caller && typeof caller == 'function') {
                 context.push(caller.apply(obj, args))
@@ -764,6 +772,8 @@ export class LoadMember extends Opcode {
         else {
             context.push(obj[args[0]])
         }
+
+        
 
         return this.ptr + 1
     }

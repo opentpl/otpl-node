@@ -53,11 +53,11 @@ export default class Writer {
 	}
 
     writeBool(val: boolean) {
-        if (!val) {
-            this.writeByte(0)
+        if (val) {
+            this.writeByte(0x01)
         }
         else {
-            this.writeByte(1)
+            this.writeByte(0x00)
         }
     }
 

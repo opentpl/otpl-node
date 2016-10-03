@@ -333,7 +333,14 @@ export class Parser {
                 tok = this.skipWhitespace()
                 if (this.peek && this.peek.type === lexer.TOKEN_ID) {
                     tok = this.next
-                    node = new ast.Property(tok.line, tok.column, node, new ast.NodeList([new ast.String(tok.value)]))
+                    let prop = new ast.Property(tok.line, tok.column, node, new ast.NodeList([new ast.String(tok.value)]))
+                    //TODO:获取成员的其它访问方式
+                    // this.skipWhitespace()
+                    // let peek=this.peek
+                    // if (peek && peek.value=='('){
+                    //     prop.getMethod=true
+                    // }
+                    node=prop
                 }
                 else {
                     this.fail('非法字符', tok.line, tok.column)
