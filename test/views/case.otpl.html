@@ -13,7 +13,8 @@ body{
 <h1>{{ header }}</h1>
 <div>total items:{{len(items)}}</div>
 <ul>
-    {{for item : items}} 
+    {{for i,item : items}} 
+        <li>{{i}}</li>
         {{if (item.current) }}
         <li><strong>{{ item.name }}</strong></li>
         {{else}}

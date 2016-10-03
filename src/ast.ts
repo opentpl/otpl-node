@@ -744,11 +744,23 @@ export class For extends NodeList {
         //开始标记
         buf.push(start);
 
+        //执行下一个迭代
+        //没有参数
+        let op = new opc.LoadVariable(this.line, this.column);
+        op.name = objName;
+        buf.push(op);
+        op = new opc.LoadVariable(this.line, this.column);
+        op.name = nextName;
+        buf.push(op);
+        let call = new opc.Call(this.line, this.column);
+        call.parameters = 0;
+        buf.push(call);
+
         //执行set方法：设置变量的值
 
         new String(this.keyName).compile(buf);
         new String(this.valueName).compile(buf);
-        let op = new opc.LoadVariable(this.line, this.column);
+        op = new opc.LoadVariable(this.line, this.column);
         op.name = objName;
         buf.push(op);
 
@@ -756,31 +768,12 @@ export class For extends NodeList {
         op.name = setName;
         buf.push(op);
 
-        let call = new opc.Call(this.line, this.column);
+        call = new opc.Call(this.line, this.column);
         call.parameters = 2;
         buf.push(call);
 
 
         super.compile(buf, start, end); //需要传递开始与结束标签，上下文中 break,continue语句需要使用
-
-        //hasNext(end, opc.Jump.FALSE);
-
-        // new Set(this.line, this.column, this.valueName,
-        //     new Property(this.line, this.column,
-        //         new Identifier(this.line, this.column, objName),
-        //         new NodeList([new String('current')]))).compile(buf);
-
-        //执行下一个迭代
-        //没有参数
-        op = new opc.LoadVariable(this.line, this.column);
-        op.name = objName;
-        buf.push(op);
-        op = new opc.LoadVariable(this.line, this.column);
-        op.name = nextName;
-        buf.push(op);
-        call = new opc.Call(this.line, this.column);
-        call.parameters = 0;
-        buf.push(call);
 
         //回到开始
         hasNext(start, opc.Jump.TRUE);

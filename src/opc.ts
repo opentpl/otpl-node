@@ -979,11 +979,17 @@ export class Reference extends Opcode {
 class Iterator {
     private iter: IterableIterator<any>
     private result: IteratorResult<any>
-    private index = -1
+    private index = 0
     private keys: string[]
+    private init=true
+    private _hasNext=false
+    private _next: IteratorResult<any>
     constructor(private context: Context) {
         let obj = context.pop() || {}
+
+        //是否是一个map
         this.keys = !obj[Symbol.iterator] && typeof obj === 'object' ? Object.keys(obj).sort() : null
+
         this.iter = obj[Symbol.iterator] ? obj[Symbol.iterator]() : (function* (me: Iterator) {
             if (me.keys) {
                 for (let i = 0; i < me.keys.length; i++) {
@@ -991,16 +997,29 @@ class Iterator {
                 }
             }
         })(this)
-        this.next()
+
+        //先获取一次，以判断是否还有下一个迭代
+        this.result = this.iter.next()
+        this._next=this.result
+        //this._hasNext= this.result && !this.result.done || this.result.value!==undefined
     }
 
     hasNext() {
-        return !this.result.done
+        // return this._hasNext
+        return !this._next.done || this.init && this._next.value!==undefined
     }
 
     next() {
+        
+        if(this.init){
+            this.init=false
+            this._next=this.iter.next()
+            return
+        }
         this.index++
-        this.result = this.iter.next()
+        this.result = this._next
+        this._next=this.iter.next()
+        // this._hasNext= this.result && !this.result.done
     }
 
     setVariables(keyName: string, valueName: string) {
