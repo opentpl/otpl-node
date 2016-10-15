@@ -608,29 +608,30 @@ export class Parser {
         return node
     }
 
-    parseLiteral(tok: lexer.Token): ast.Node {
+    parseLiteral(tok: lexer.Token): ast.Data {
         let tag = tok
-        let buf: lexer.Token[] = []
-        while ((tok = this.next)) {
-            if (tok.type === lexer.TOKEN_LITERAL_END) {
+        // let buf: lexer.Token[] = []
+        let value=''
+        while ((tok = this.peek)) {
+            
+            if (tok.type === lexer.TOKEN_LITERAL) {
 
-                var value = ''
-
-                for (var t of buf) {
-                    value += t.value
-                }
-                return new ast.Data(tok.line, tok.column, value)
+                value += this.next.value
+                
             }
-            else if (tok.type === lexer.TOKEN_LITERAL_START) {
-                this.fail('parseLiteral: 非法的开始标签', tok.line, tok.column)
+            else if (tok.type === lexer.TOKEN_LITERAL_START || tok.type === lexer.TOKEN_LITERAL_END) {
+                tok=this.next
             }
             else {
-                buf.push(tok)
+                break;
             }
         }
-
-        this.fail('parseLiteral: 未结束的标签', tag.line, tag.column)
-        return null
+        // if (value==''){
+        //     return new ast.Skip(false)
+        // }
+        return new ast.Data(tag.line, tag.column, value)
+        // this.fail('parseLiteral: 未结束的标签', tag.line, tag.column)
+        // return null
     }
 
     /**
@@ -670,12 +671,18 @@ export class Parser {
                     }
                 }
             }
-            else if (tok.type === lexer.TOKEN_LITERAL_START) {
-                tok = this.next
-                node = this.parseLiteral(tok)
+            else if (tok.type === lexer.TOKEN_LITERAL_START || tok.type === lexer.TOKEN_LITERAL_END || tok.type === lexer.TOKEN_LITERAL) {
+
+                let node = this.parseLiteral(tok)
                 if (node) {
-                    buf.push(node)
+                    //TODO: 优化去掉空白行
+                    let tmp = (node.value || '').replace('\r\n', '').replace('\n', '').replace('\r', '').replace('\t', '').replace(' ', '')
+                    if (tmp != '') {
+                        buf.push(new ast.Print(node.line, node.column, node, false, []))
+                    }
+                    //buf.push(node)
                 }
+                //console.log(node)
             }
             else if (tok.type === lexer.TOKEN_COMMENT) {
                 tok = this.next

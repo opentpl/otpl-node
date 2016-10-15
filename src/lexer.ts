@@ -308,17 +308,20 @@ export class Tokenizer {
                         this.inCode = false;
                         break;
                     }
-                    else if (this.current() === '/' && (tok = this.extractString('/literal'))) {
-                        //this.fail('test')
-                        if (/\w/.test(this.current())) {
-                            this.backN(tok.length);
-                            break;
-                        }
-                        else {
-                            this.inLiteral = false;
-                            break;
-                        }
+                    else if(this.current() === '%'){
+                        break;
                     }
+                    // else if (this.current() === '/' && (tok = this.extractString('/literal'))) {
+                    //     //this.fail('test')
+                    //     if (/\w/.test(this.current())) {
+                    //         this.backN(tok.length);
+                    //         break;
+                    //     }
+                    //     else {
+                    //         this.inLiteral = false;
+                    //         break;
+                    //     }
+                    // }
                     val += this.current();
                     this.forward();
                 }
@@ -470,16 +473,6 @@ export class Tokenizer {
                         val += this.current();
                         this.forward();
                     }
-                    // this.stripWhitespace();
-                    // if(val == 'literal'){
-                    // 	if((tok = this.extractString(this.tags.blockEnd))){
-                    // 		this.inLiteral = true;
-                    // 		return token(TOKEN_LITERAL_START,val,line,col);
-                    // 	}
-                    // 	else{
-                    // 		this.fail('literal标签必须是独立的。',line,col);
-                    // 	}
-                    // }
                     if (/TRUE|FALSE/i.test(val)) {
                         return token(TOKEN_BOOLEAN, val, line, col);
                     }
@@ -500,15 +493,16 @@ export class Tokenizer {
             //独立标签
             var old = this.index;
             this.stripWhitespace();
-            if (this.inLiteral && (tok = this.extractString('/literal'))) {
+            if (this.inLiteral && (tok = this.extractString('%'))) {
                 this.stripWhitespace();
                 if ((tok = this.extractString(this.blockEnd))) {
                     this.inLiteral = false;
                     this.inCode = false;
                     return token(TOKEN_LITERAL_END, val, line, col);
                 }
+                //TODO:语法错误？
             }
-            else if (!this.inLiteral && (tok = this.extractString('literal')) && !/\w/.test(this.current())) {
+            else if (!this.inLiteral && (tok = this.extractString('%'))) { // && !/\w/.test(this.current())
                 this.stripWhitespace();
                 if ((tok = this.extractString(this.blockEnd))) {
                     this.inLiteral = true;
