@@ -1,24 +1,20 @@
-# otpl-node
-
-[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Coveralls Status][coveralls-image]][coveralls-url]
+# otpl-node  [![NPM version][npm-image]][npm-url] [![License][license-image]][license-url] [![Build Status][travis-image]][travis-url]
 
 OTPL for Nodejs (Typescript). 
 
 
+## Documentation
 
-## OTPL规范/文档
+- [OTPL Spec](https://github.com/diosay/open-tpl)
+- [Developer Doc](https://github.com/diosay/otpl-node/blob/master/src/README.md)
 
-[OTPL Spec](https://github.com/diosay/open-tpl).
-
-[Developer Doc](https://github.com/diosay/otpl-node/blob/master/src/README.md).
-
-## 安装
+## Installation
 
 ```bash
 $ npm install opentpl --save
 ```
 
-## 用例
+## Usage
 ```js
 const otpl = require('opentpl')
 
@@ -51,7 +47,7 @@ app.use(function *(next){
 });
 
 app.use(function *(next){
-    this.otpl('index',{foo:'bar'}) // /views/index.otpl.html
+    this.otpl('index',{foo:'bar'}) //template file: /views/index.otpl.html
 })
 
 app.listen(3000,function(err){
@@ -60,17 +56,24 @@ app.listen(3000,function(err){
 
 ```
 
+## License
+
+[Apache-2.0][license-url]
+
 
 [downloads-image]: https://img.shields.io/npm/dm/otpl.svg
+
+[license-url]: https://opensource.org/licenses/Apache-2.0
+[license-image]: https://img.shields.io/badge/license-Apache2.0-blue.svg
 
 [npm-url]: https://www.npmjs.com/package/otpl
 [npm-image]: https://img.shields.io/npm/v/otpl.svg
 
-[travis-url]: https://travis-ci.org/diosay/otpl-node
-[travis-image]: https://img.shields.io/travis/diosay/otpl-node.svg
+[travis-url]: https://travis-ci.org/opentpl/otpl-node
+[travis-image]: https://img.shields.io/travis/opentpl/otpl-node.svg
 
-[coveralls-url]: https://coveralls.io/r/diosay/otpl-node
-[coveralls-image]: https://img.shields.io/coveralls/diosay/otpl-node/master.svg
+[coveralls-url]: https://coveralls.io/r/opentpl/otpl-node
+[coveralls-image]: https://img.shields.io/coveralls/opentpl/otpl-node/master.svg
 
-[gitter-url]: https://gitter.im/diosay/otpl-node
-[gitter-image]: https://badges.gitter.im/diosay/otpl-node.png
+[gitter-url]: https://gitter.im/opentpl/otpl-node
+[gitter-image]: https://badges.gitter.im/opentpl/otpl-node.png
