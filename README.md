@@ -56,6 +56,14 @@ app.listen(3000,function(err){
 
 ```
 
+## Changelog
+
+Details changes for each release are documented in the [release notes](https://github.com/opentpl/otpl-node/releases).
+
+## Contribution
+
+If you find a bug or want to contribute to the code or documentation, you can help by submitting an [issue](https://github.com/opentpl/otpl-node/issues) or a [pull request](https://github.com/opentpl/otpl-node/pulls).
+
 ## License
 
 [Apache-2.0][license-url]
