@@ -37,3 +37,4 @@ ctrl+shift+b
 
 
 
+&& typings install 
