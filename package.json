@@ -4,7 +4,7 @@
   "description": "OTPL for Nodejs",
   "main": "lib/index.js",
   "scripts": {
-    "test": "node .build/clean.js && tsc -p . && node ./test/index.js",
+    "test": "node .build/clean.js && typings install && tsc -p . && node ./test/index.js",
     "prepublish": "npm test"
   },
   "repository": {

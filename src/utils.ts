@@ -2,7 +2,7 @@
  * Copyright 2016 otpl-node Author. All rights reserved.
  *--------------------------------------------------------*/
 
-/// <reference path="../typings/main.d.ts" />
+/// <reference path="../typings/index.d.ts" />
 
 import * as crypto from "crypto"
 import * as fs from "fs"

@@ -4,7 +4,7 @@
 $ npm install -g typescript //https://www.typescriptlang.org/
 
 $ npm install -g typings //https://github.com/typings/typings
-- typings install node --ambient --save
+- Node: typings install env~node --global --save
 
 ## 国内NPM加速
 npm install -g cnpm --registry=https://registry.npm.taobao.org
@@ -34,7 +34,3 @@ ctrl+shift+b
 2、不能使用可变参数，否则编译后NODE不能执行。
 
 3、不能使用FOR-OF 的带[key,value] 的语句，否则编译后NODE不能执行
-
-
-
-&& typings install 
